@@ -85,7 +85,7 @@ const List<BaseGearArchetype> standardArchetypesPool = [
 
   BaseGearArchetype(slot: GearSlot.boots, baseName: 'Standardowe Sandały Shinobi', baseStat: 2, lore: 'Dobre oparcie stóp na drzewach.'),
   BaseGearArchetype(slot: GearSlot.boots, baseName: 'Wyciszone Mokasyny ANBU', baseStat: 5, setGroup: 'anbu', lore: 'Tłumią odgłos kroków przy skradaniu.'),
-  BaseGearArchetype(slot: GearSlot.boots, baseName: 'Ciężarki Treningowe na Kostki', baseStat: 7, lore: 'Hartują nogi pod kątem natychmiastowego zrywu.'),
+  BaseGearArchetype(slot: GearTiny: GearSlot.boots, baseName: 'Ciężarki Treningowe na Kostki', baseStat: 7, lore: 'Hartują nogi pod kątem natychmiastowego zrywu.'),
   BaseGearArchetype(slot: GearSlot.boots, baseName: 'Drewniane Geta Żabiego Mędrca', baseStat: 9, setGroup: 'myoboku', lore: 'Idealny balans na śliskich skałach.'),
 
   BaseGearArchetype(slot: GearSlot.trinket, baseName: 'Amulet Ochronny z Liścia', baseStat: 3, lore: 'Błogosławieństwo kaplicy Konohy.'),
@@ -1977,7 +1977,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       final slot = GearSlot.values[slotIndex];
       final drop = _generateRandomGear(slot: slot, guaranteedBossDrop: guaranteedBossDrop);
 
-      NinjaGear currentGear;
+      NinjaGear currentGear = currentWeapon;
       switch (slot) {
         case GearSlot.weapon: currentGear = currentWeapon; break;
         case GearSlot.armor: currentArmor = currentArmor; break;
