@@ -7,11 +7,10 @@ void main() => runApp(const ShinobiLooterApp());
 
 enum ItemRarity { common, rare, epic, legendary }
 enum ConsumableType { healHp, healChakra, buffAtk, maxStats, directDmg, smokeEscape, fullRestore }
-enum GearSlot { weapon, armor, helmet, boots }
+enum GearSlot { weapon, armor, helmet, boots, trinket }
 enum JutsuEffect { none, burn, freeze, stun, lifesteal, shock }
 enum EnemyPrefix { weak, normal, strong }
 
-// Materiały do kucia
 const String matIronOre = 'mat_iron_ore';
 const String matSteel = 'mat_steel';
 const String matCrystal = 'mat_crystal';
@@ -40,12 +39,14 @@ class BaseGearArchetype {
   final String baseName;
   final GearSlot slot;
   final int baseStat;
+  final String setGroup;
   final String lore;
 
   const BaseGearArchetype({
     required this.baseName,
     required this.slot,
     required this.baseStat,
+    this.setGroup = 'none',
     required this.lore,
   });
 }
@@ -55,38 +56,47 @@ const List<BaseGearArchetype> standardArchetypesPool = [
   BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Standardowy Kunai', baseStat: 4, lore: 'Podstawowe narzędzie każdego ninja.'),
   BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Składany Shuriken Fūma', baseStat: 6, lore: 'Wirujące ostrza.'),
   BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Igły Senbon z Ame', baseStat: 5, lore: 'Precyzyjnie paraliżują punkty tenketsu.'),
-  BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Krótki Miecz Tanto ANBU', baseStat: 8, lore: 'Ostrze skrytobójców z Korzenia.'),
+  BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Krótki Miecz Tanto ANBU', baseStat: 8, setGroup: 'anbu', lore: 'Ostrze skrytobójców z Korzenia.'),
   BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Kastety ze stali czakry', baseStat: 7, lore: 'Wzmacniają ciosy taijutsu.'),
   BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Dmuchawka z Amegakure', baseStat: 5, lore: 'Miotacz zatrutych igieł.'),
   BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Włócznia Skalnego Posterunku', baseStat: 9, lore: 'Ciężka broń drzewcowa z Iwagakure.'),
   BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Bliźniacze Tasaki Kiri', baseStat: 9, lore: 'Agresywny oręż sieczny z Mgły.'),
   BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Łuk Pajęczej Nici', baseStat: 10, lore: 'Naciąg z utwardzonej nici z czakrą.'),
   BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Ostrza Czakry Asumy', baseStat: 11, lore: 'Przewodzą ostrą naturę wiatru.'),
-  BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Żelazny Wachlarz Piasku', baseStat: 10, lore: 'Wzbudza gwałtowne fale uderzeniowe.'),
-  BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Kościane Ostrze Yanagi', baseStat: 12, lore: 'Wyjątkowo twardy kościec klanu Kaguya.'),
+  BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Żelazny Wachlarz Piasku', baseStat: 10, setGroup: 'sand', lore: 'Wzbudza fale uderzeniowe.'),
+  BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Kościane Ostrze Yanagi', baseStat: 12, lore: 'Twardy kościec klanu Kaguya.'),
+  BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Żelazne Szpony Taijutsu', baseStat: 9, lore: 'Ostre pazury zakładane na przedramię.'),
+  BaseGearArchetype(slot: GearSlot.weapon, baseName: 'Krótki Miecz Chidorigatana', baseStat: 12, lore: 'Ostrze idealnie przewodzące błyskawice.'),
 
   // PANCERZE
   BaseGearArchetype(slot: GearSlot.armor, baseName: 'Szata Treningowa Genina', baseStat: 3, lore: 'Lekki płócienny strój.'),
   BaseGearArchetype(slot: GearSlot.armor, baseName: 'Ochraniacz Klatki Liścia', baseStat: 4, lore: 'Podstawowa kamizelka ochronna.'),
-  BaseGearArchetype(slot: GearSlot.armor, baseName: 'Skórzana Zbroja Pustyni', baseStat: 5, lore: 'Odporna na piasek i ostre cięcia.'),
+  BaseGearArchetype(slot: GearSlot.armor, baseName: 'Skórzana Zbroja Pustyni', baseStat: 5, setGroup: 'sand', lore: 'Odporna na piasek i ostre cięcia.'),
   BaseGearArchetype(slot: GearSlot.armor, baseName: 'Mundur Bojowy Iwagakure', baseStat: 6, lore: 'Pancerz ciężkiej piechoty ze Skały.'),
-  BaseGearArchetype(slot: GearSlot.armor, baseName: 'Kamizelka Jonina Konohy', baseStat: 9, lore: 'Oficjalny pancerz taktyczny z kieszeniami na zwoje.'),
-  BaseGearArchetype(slot: GearSlot.armor, baseName: 'Elitarny Napierśnik ANBU', baseStat: 11, lore: 'Wzmocniona powłoka operacyjna.'),
+  BaseGearArchetype(slot: GearSlot.armor, baseName: 'Kamizelka Jonina Konohy', baseStat: 9, lore: 'Oficjalny pancerz taktyczny.'),
+  BaseGearArchetype(slot: GearSlot.armor, baseName: 'Elitarny Napierśnik ANBU', baseStat: 11, setGroup: 'anbu', lore: 'Wzmocniona powłoka operacyjna.'),
   BaseGearArchetype(slot: GearSlot.armor, baseName: 'Pancerz Bojowy Kumogakure', baseStat: 10, lore: 'Płyta naramienna z elastycznym splotem.'),
-  BaseGearArchetype(slot: GearSlot.armor, baseName: 'Szata Pustelnika Myōboku', baseStat: 13, lore: 'Szata nasycona energią natury senjutsu.'),
+  BaseGearArchetype(slot: GearSlot.armor, baseName: 'Szata Pustelnika Myōboku', baseStat: 13, setGroup: 'myoboku', lore: 'Szata nasycona energią senjutsu.'),
+  BaseGearArchetype(slot: GearSlot.armor, baseName: 'Zbroja Samuraja Żelaza', baseStat: 15, lore: 'Ciężka stal płytowa z Kraju Żelaza.'),
 
   // GŁOWA
   BaseGearArchetype(slot: GearSlot.helmet, baseName: 'Ochraniacz Czołowy Protektor', baseStat: 2, lore: 'Metalowa płytka z symbolem wioski.'),
   BaseGearArchetype(slot: GearSlot.helmet, baseName: 'Maska Oddechowa Amegakure', baseStat: 3, lore: 'Filtruje gazy i trujące opary.'),
-  BaseGearArchetype(slot: GearSlot.helmet, baseName: 'Porcelanowa Maska Lisa ANBU', baseStat: 6, lore: 'Zaciera tożsamość i aurę czakry.'),
+  BaseGearArchetype(slot: GearSlot.helmet, baseName: 'Porcelanowa Maska Lisa ANBU', baseStat: 6, setGroup: 'anbu', lore: 'Zaciera tożsamość i aurę czakry.'),
   BaseGearArchetype(slot: GearSlot.helmet, baseName: 'Bandaże Cichego Zabójcy', baseStat: 5, lore: 'Tłumią odgłosy oddechu w gęstej mgle.'),
   BaseGearArchetype(slot: GearSlot.helmet, baseName: 'Tradycyjny Kapelusz Kage', baseStat: 10, lore: 'Rytualne nakrycie głowy przywódcy.'),
 
   // BUTY
-  BaseGearArchetype(slot: GearSlot.boots, baseName: 'Standardowe Sandały Shinobi', baseStat: 2, lore: 'Dobre oparcie stóp na pniach drzew.'),
-  BaseGearArchetype(slot: GearSlot.boots, baseName: 'Wyciszone Mokasyny ANBU', baseStat: 5, lore: 'Tłumią odgłos kroków przy skradaniu.'),
+  BaseGearArchetype(slot: GearSlot.boots, baseName: 'Standardowe Sandały Shinobi', baseStat: 2, lore: 'Dobre oparcie stóp na drzewach.'),
+  BaseGearArchetype(slot: GearSlot.boots, baseName: 'Wyciszone Mokasyny ANBU', baseStat: 5, setGroup: 'anbu', lore: 'Tłumią odgłos kroków przy skradaniu.'),
   BaseGearArchetype(slot: GearSlot.boots, baseName: 'Ciężarki Treningowe na Kostki', baseStat: 7, lore: 'Hartują nogi pod kątem natychmiastowego zrywu.'),
-  BaseGearArchetype(slot: GearSlot.boots, baseName: 'Drewniane Geta Żabiego Mędrca', baseStat: 9, lore: 'Idealny balans na śliskich skałach.'),
+  BaseGearArchetype(slot: GearSlot.boots, baseName: 'Drewniane Geta Żabiego Mędrca', baseStat: 9, setGroup: 'myoboku', lore: 'Idealny balans na śliskich skałach.'),
+
+  // TALIZMANY (SLOT 5)
+  BaseGearArchetype(slot: GearSlot.trinket, baseName: 'Amulet Ochronny z Liścia', baseStat: 3, lore: 'Błogosławieństwo kaplicy Konohy.'),
+  BaseGearArchetype(slot: GearSlot.trinket, baseName: 'Dzwonki Przetrwania Jonina', baseStat: 5, lore: 'Dwa dzwonki używane przy testach polowych.'),
+  BaseGearArchetype(slot: GearSlot.trinket, baseName: 'Koraliki Modlitewne Mnicha', baseStat: 6, lore: 'Koją umysł i ułatwiają skupienie CP.'),
+  BaseGearArchetype(slot: GearSlot.trinket, baseName: 'Pieczęć Skupienia Czakry', baseStat: 8, lore: 'Zmniejsza straty energii przy jutsu.'),
 ];
 
 class LegendaryGearTemplate {
@@ -95,6 +105,7 @@ class LegendaryGearTemplate {
   final int baseStat;
   final String bonusEffect;
   final int bonusValue;
+  final String setGroup;
   final String lore;
 
   const LegendaryGearTemplate({
@@ -103,23 +114,27 @@ class LegendaryGearTemplate {
     required this.baseStat,
     required this.bonusEffect,
     required this.bonusValue,
+    this.setGroup = 'none',
     required this.lore,
   });
 }
 
 const List<LegendaryGearTemplate> legendaryArtifactsPool = [
   LegendaryGearTemplate(name: 'Miecz Totsuka (Sakegari)', slot: GearSlot.weapon, baseStat: 36, bonusEffect: 'Pieczęć Wiecznego Snu', bonusValue: 8, lore: 'Widmowe ostrze pieczętujące w tykwie.'),
-  LegendaryGearTemplate(name: 'Miecz Kusanagi Orochimaru', slot: GearSlot.weapon, baseStat: 33, bonusEffect: 'Niezniszczalna Stal', bonusValue: 7, lore: 'Ostrze zdolne przeciąć diament.'),
-  LegendaryGearTemplate(name: 'Samehada (Żarłacz Kisame)', slot: GearSlot.weapon, baseStat: 34, bonusEffect: 'Pożeranie Czakry', bonusValue: 8, lore: 'Żywy miecz wysysający energię przeciwnika.'),
-  LegendaryGearTemplate(name: 'Wojenny Wachlarz Gunbai Madary', slot: GearSlot.weapon, baseStat: 35, bonusEffect: 'Odbicie Uchihagaeshi', bonusValue: 8, lore: 'Odbija techniki ninjutsu w napastnika.'),
+  LegendaryGearTemplate(name: 'Miecz Kusanagi Orochimaru', slot: GearSlot.weapon, baseStat: 33, bonusEffect: 'Niezniszczalna Stal', bonusValue: 7, lore: 'Ostrze przecinające diament.'),
+  LegendaryGearTemplate(name: 'Samehada (Żarłacz Kisame)', slot: GearSlot.weapon, baseStat: 34, bonusEffect: 'Pożeranie Czakry', bonusValue: 8, lore: 'Żywy miecz wysysający energię wroga.'),
+  LegendaryGearTemplate(name: 'Wojenny Wachlarz Gunbai Madary', slot: GearSlot.weapon, baseStat: 35, bonusEffect: 'Odbicie Uchihagaeshi', bonusValue: 8, lore: 'Odbija ninjutsu wroga.'),
   LegendaryGearTemplate(name: 'Miecz Nunoboko Hagoromo', slot: GearSlot.weapon, baseStat: 42, bonusEffect: 'Stworzenie Świata Rikudō', bonusValue: 10, lore: 'Spiralna broń z czarnych kul Gudōdama.'),
-  LegendaryGearTemplate(name: 'Klatka Żebrowa Susanoo', slot: GearSlot.armor, baseStat: 31, bonusEffect: 'Absolutny Kościec', bonusValue: 7, lore: 'Eteryczny pancerz z płomieni czakry.'),
-  LegendaryGearTemplate(name: 'Pancerz Ostatecznego Susanoo', slot: GearSlot.armor, baseStat: 38, bonusEffect: 'Bóstwo Zniszczenia', bonusValue: 10, lore: 'Skrzydlata zbroja niszcząca góry.'),
+  LegendaryGearTemplate(name: 'Klatka Żebrowa Susanoo', slot: GearSlot.armor, baseStat: 31, bonusEffect: 'Absolutny Kościec', bonusValue: 7, lore: 'Eteryczny szkielet płomieni Sharingana.'),
+  LegendaryGearTemplate(name: 'Pancerz Ostatecznego Susanoo', slot: GearSlot.armor, baseStat: 38, bonusEffect: 'Bóstwo Zniszczenia', bonusValue: 10, lore: 'Skrzydlata zbroja niszcząca pasma górskie.'),
   LegendaryGearTemplate(name: 'Szata Mędrca Sześciu Ścieżek', slot: GearSlot.armor, baseStat: 35, bonusEffect: 'Harmonia Yin-Yang', bonusValue: 9, lore: 'Biała szata z motywem magatama.'),
   LegendaryGearTemplate(name: 'Maska Jednoocznego Wiru (Obito)', slot: GearSlot.helmet, baseStat: 29, bonusEffect: 'Pusta Niematerialność', bonusValue: 7, lore: 'Ułatwia manipulację wymiarem Kamui.'),
-  LegendaryGearTemplate(name: 'Korona Rogatej Bogini Kaguya', slot: GearSlot.helmet, baseStat: 32, bonusEffect: 'Wizja Byakugana', bonusValue: 8, lore: 'Relikt Świętego Drzewa.'),
-  LegendaryGearTemplate(name: 'Obuwie Żółtego Błysku (Hiraishin)', slot: GearSlot.boots, baseStat: 29, bonusEffect: 'Teleportacja Błysku', bonusValue: 7, lore: 'Sandały Minato z wyrytą formułą pieczęci.'),
-  LegendaryGearTemplate(name: 'Lewitujące Płyty Rikudō', slot: GearSlot.boots, baseStat: 33, bonusEffect: 'Lot Ponad Prawami Świata', bonusValue: 8, lore: 'Płyty unoszące shinobi nad ziemią.'),
+  LegendaryGearTemplate(name: 'Korona Rogatej Bogini Kaguya', slot: GearSlot.helmet, baseStat: 32, bonusEffect: 'Wizja Byakugana', bonusValue: 8, lore: 'Boski relikt Świętego Drzewa.'),
+  LegendaryGearTemplate(name: 'Obuwie Żółtego Błysku (Hiraishin)', slot: GearSlot.boots, baseStat: 29, bonusEffect: 'Teleportacja Błysku', bonusValue: 7, lore: 'Sandały Minato z wyrytą pieczęcią.'),
+  LegendaryGearTemplate(name: 'Lewitujące Płyty Rikudō', slot: GearSlot.boots, baseStat: 33, bonusEffect: 'Lot Ponad Ziemią', bonusValue: 8, lore: 'Unoszą shinobi bez dotykania podłoża.'),
+  LegendaryGearTemplate(name: 'Naszyjnik Pierwszego Hokage', slot: GearSlot.trinket, baseStat: 25, bonusEffect: 'Ocalenie Duszy Hashiramy', bonusValue: 10, lore: 'Kryształ czakry chroniący przed natychmiastowym zgonem.'),
+  LegendaryGearTemplate(name: 'Pierścień Akatsuki (Zero)', slot: GearSlot.trinket, baseStat: 28, bonusEffect: 'Rezonans Bólu Świata', bonusValue: 9, lore: 'Zwielokrotnia łup i Ryo z pokonanych wrogów.'),
+  LegendaryGearTemplate(name: 'Złota Moneta Tsunade', slot: GearSlot.trinket, baseStat: 22, bonusEffect: 'Hazardowe Szczęście', bonusValue: 8, lore: 'Zwiększa szanse na legendarne znaleziska.'),
 ];
 
 class NinjaGear {
@@ -128,8 +143,9 @@ class NinjaGear {
   final int baseStat;
   final String bonusEffect;
   final int bonusValue;
+  final String setGroup;
   final bool isSoulbound;
-  final int upgradeLevel; // 0..9
+  final int upgradeLevel;
 
   const NinjaGear({
     required this.name,
@@ -137,6 +153,7 @@ class NinjaGear {
     required this.baseStat,
     required this.bonusEffect,
     required this.bonusValue,
+    this.setGroup = 'none',
     this.isSoulbound = false,
     this.upgradeLevel = 0,
   });
@@ -147,6 +164,7 @@ class NinjaGear {
     int? baseStat,
     String? bonusEffect,
     int? bonusValue,
+    String? setGroup,
     bool? isSoulbound,
     int? upgradeLevel,
   }) {
@@ -156,16 +174,13 @@ class NinjaGear {
       baseStat: baseStat ?? this.baseStat,
       bonusEffect: bonusEffect ?? this.bonusEffect,
       bonusValue: bonusValue ?? this.bonusValue,
+      setGroup: setGroup ?? this.setGroup,
       isSoulbound: isSoulbound ?? this.isSoulbound,
       upgradeLevel: upgradeLevel ?? this.upgradeLevel,
     );
   }
 
-  int get effectiveStat {
-    // Każdy poziom ulepszenia daje bonus do statystyki
-    return baseStat + (upgradeLevel * (2 + rarity.index));
-  }
-
+  int get effectiveStat => baseStat + (upgradeLevel * (2 + rarity.index));
   String get displayName => upgradeLevel > 0 ? '$name +$upgradeLevel' : name;
 
   Map<String, dynamic> toJson() => {
@@ -174,6 +189,7 @@ class NinjaGear {
         'baseStat': baseStat,
         'bonusEffect': bonusEffect,
         'bonusValue': bonusValue,
+        'setGroup': setGroup,
         'isSoulbound': isSoulbound,
         'upgradeLevel': upgradeLevel,
       };
@@ -182,8 +198,9 @@ class NinjaGear {
         name: json['name'],
         rarity: ItemRarity.values[json['rarity']],
         baseStat: json['baseStat'],
-        bonusEffect: json['bonusEffect'],
-        bonusValue: json['bonusValue'],
+        bonusEffect: json['bonusEffect'] ?? 'Brak',
+        bonusValue: json['bonusValue'] ?? 0,
+        setGroup: json['setGroup'] ?? 'none',
         isSoulbound: json['isSoulbound'] ?? false,
         upgradeLevel: json['upgradeLevel'] ?? 0,
       );
@@ -238,11 +255,12 @@ class Consumable {
 const List<Consumable> allConsumables = [
   Consumable(id: 'c_pill', name: 'Pigułka Żywnościowa', description: '+35 Czakry (CP).', type: ConsumableType.healChakra, value: 35, price: 25, icon: '💊'),
   Consumable(id: 'c_dango', name: 'Słodkie Dango', description: '+20 Zdrowia (HP).', type: ConsumableType.healHp, value: 20, price: 18, icon: '🍡'),
-  Consumable(id: 'c_ointment', name: 'Balsam Ziołowy Medyka', description: '+50 Zdrowia (HP).', type: ConsumableType.healHp, value: 50, price: 45, icon: '🧴'),
+  Consumable(id: 'c_bandage', name: 'Bandaże Uciskowe', description: '+30 Zdrowia (HP).', type: ConsumableType.healHp, value: 30, price: 28, icon: '🩹'),
+  Consumable(id: 'c_ointment', name: 'Balsam Ziołowy Medyka', description: '+55 Zdrowia (HP).', type: ConsumableType.healHp, value: 55, price: 45, icon: '🧴'),
   Consumable(id: 'c_ramen', name: 'Ramen Ichiraku', description: 'Pełne leczenie HP i CP oraz +10 Max statystyk.', type: ConsumableType.fullRestore, value: 10, price: 130, icon: '🍜'),
   Consumable(id: 'c_power_pill', name: 'Pigułka Siły', description: '+3 do stałego Ataku.', type: ConsumableType.buffAtk, value: 3, price: 110, icon: '⚡'),
   Consumable(id: 'c_kibaku', name: 'Pieczęć Wybuchowa', description: 'Zadaje 30 dmg w walce.', type: ConsumableType.directDmg, value: 30, price: 45, icon: '🏷️'),
-  Consumable(id: 'c_smoke', name: 'Bomba Dymna', description: 'Gwarantowana ucieczka z walki.', type: ConsumableType.smokeEscape, value: 0, price: 35, icon: '💨'),
+  Consumable(id: 'c_smoke', name: 'Bomba Dymna', description: 'Gwarantowana ucieczka ze starcia.', type: ConsumableType.smokeEscape, value: 0, price: 35, icon: '💨'),
 ];
 
 class Jutsu {
@@ -324,7 +342,6 @@ class EnemyTemplate {
   });
 }
 
-// BAZA WROGÓW (LUDZIE + ZWIERZĘTA)
 const List<EnemyTemplate> standardEnemiesPool = [
   // Zwierzęta leśne
   EnemyTemplate(name: 'Dziki Ninja-Pies', title: 'Zdziczały Ninken', baseHp: 20, baseAtk: 6, isBeast: true),
@@ -332,8 +349,19 @@ const List<EnemyTemplate> standardEnemiesPool = [
   EnemyTemplate(name: 'Gigantyczny Pająk z Mgły', title: 'Drapieżnik Pajęczyn', baseHp: 24, baseAtk: 8, isBeast: true),
   EnemyTemplate(name: 'Niedźwiedź z Lasu Śmierci', title: 'Monstrum z Puszczy', baseHp: 38, baseAtk: 9, isBeast: true),
   EnemyTemplate(name: 'Święty Jeleń Klanu Nara', title: 'Zwinny Strażnik Boru', baseHp: 26, baseAtk: 7, isBeast: true),
+  EnemyTemplate(name: 'Trująca Żmija z Doliny Ryūchi', title: 'Jadowity Wąż', baseHp: 25, baseAtk: 9, isBeast: true),
+  EnemyTemplate(name: 'Pustynny Skorpion z Piasku', title: 'Pancerne Żądło', baseHp: 30, baseAtk: 8, isBeast: true),
 
-  // Ludzie / Shinobi
+  // Otogakure / Eksperymenty Przeklętej Pieczęci
+  EnemyTemplate(name: 'Poddany Przeklętej Pieczęci', title: 'Niestabilny Wojownik Dźwięku', baseHp: 34, baseAtk: 10),
+  EnemyTemplate(name: 'Zmutowany Berserker Dźwięku', title: 'Krwiożerczy Eksperyment', baseHp: 44, baseAtk: 11),
+  EnemyTemplate(name: 'Chimera Czakry z Otogakure', title: 'Bestia Laboratoryjna', baseHp: 40, baseAtk: 10, isBeast: true),
+
+  // Żywiołaki & Konstrukty Ninjutsu
+  EnemyTemplate(name: 'Błotny Golem Doton', title: 'Kamienny Konstrukt', baseHp: 46, baseAtk: 8),
+  EnemyTemplate(name: 'Wodny Klon Zabójcy (Mizu Bunshin)', title: 'Płynny Szpieg Kiri', baseHp: 24, baseAtk: 9),
+
+  // Standardowi Wrogi Shinobi
   EnemyTemplate(name: 'Bandyta z Kraju Fal', title: 'Pospolity Rabuś', baseHp: 24, baseAtk: 6),
   EnemyTemplate(name: 'Zbuntowany Ninja Deszczu', title: 'Nuke-nin z Amegakure', baseHp: 28, baseAtk: 7),
   EnemyTemplate(name: 'Szpieg z Iwagakure', title: 'Zwiadowca Skały', baseHp: 32, baseAtk: 8),
@@ -350,6 +378,9 @@ const List<EnemyTemplate> bossesPool = [
   EnemyTemplate(name: 'Haku', title: 'Mistrz Lodowych Luster Hyōton', baseHp: 80, baseAtk: 16, isBoss: true),
   EnemyTemplate(name: 'Gaara Pustyni', title: 'Głos Shukaku', baseHp: 110, baseAtk: 14, isBoss: true),
   EnemyTemplate(name: 'Kimimaro Kaguya', title: 'Taniec Kości', baseHp: 100, baseAtk: 18, isBoss: true),
+  EnemyTemplate(name: 'Deidara (Akatsuki)', title: 'Eksplodująca Sztuka C4', baseHp: 115, baseAtk: 22, isBoss: true),
+  EnemyTemplate(name: 'Kisame Hoshigaki', title: 'Bestia Bez Ogona', baseHp: 140, baseAtk: 19, isBoss: true),
+  EnemyTemplate(name: 'Kakuzu (Akatsuki)', title: 'Monstrum Pięciu Serc', baseHp: 145, baseAtk: 23, isBoss: true),
   EnemyTemplate(name: 'Orochimaru', title: 'Legendarny Wężowy Sannin', baseHp: 135, baseAtk: 20, isBoss: true),
   EnemyTemplate(name: 'Sasori', title: 'Czerwony Piasek', baseHp: 125, baseAtk: 21, isBoss: true),
   EnemyTemplate(name: 'Itachi Uchiha', title: 'Mistrz Mangekyō Sharingana', baseHp: 135, baseAtk: 24, isBoss: true),
@@ -357,9 +388,8 @@ const List<EnemyTemplate> bossesPool = [
   EnemyTemplate(name: 'Madara Uchiha', title: 'Duch Klanu Uchiha', baseHp: 210, baseAtk: 32, isBoss: true),
 ];
 
-// EGZAMINATORZY NA ARENIE KONOHY
 class ExamStage {
-  final int targetRankIndex; // 1: Genin, 2: Chunin, 3: Tokubetsu Jonin, 4: Jonin, 5: Sannin
+  final int targetRankIndex;
   final String rankTitle;
   final int requiredLevel;
   final String examinerName;
@@ -436,7 +466,7 @@ const List<ExamStage> shinobiExams = [
 class ShinobiMission {
   final String id;
   final String rank;
-  final int minRankIndex; // Wymagana zdana ranga egzaminacyjna (0..5)
+  final int minRankIndex;
   final String title;
   final String desc;
   final int requiredKills;
@@ -455,7 +485,6 @@ class ShinobiMission {
   });
 }
 
-// ZWIĘKSZONE WYMAGANIA MISJI
 const List<ShinobiMission> allMissionsPool = [
   ShinobiMission(id: 'm_d1', rank: 'D', minRankIndex: 0, title: 'Odchwaszczanie Ogrodów Daimyō', desc: 'Wyeliminuj 4 szkodniki w lasach Liścia.', requiredKills: 4, rewardRyo: 45, rewardExp: 22),
   ShinobiMission(id: 'm_d2', rank: 'D', minRankIndex: 0, title: 'Poszukiwanie Kota Tora', desc: 'Przepędź 5 leśnych bestii i zabezpiecz teren.', requiredKills: 5, rewardRyo: 65, rewardExp: 28),
@@ -470,7 +499,7 @@ const List<ShinobiMission> allMissionsPool = [
   ShinobiMission(id: 'm_b3', rank: 'B', minRankIndex: 3, title: 'Zasadzka na Czwórkę Dźwięku', desc: 'Pokonaj 14 strażników bramy dźwięku.', requiredKills: 14, rewardRyo: 500, rewardExp: 220),
 
   ShinobiMission(id: 'm_a1', rank: 'A', minRankIndex: 4, title: 'Pojmanie Członków Akatsuki', desc: 'Pokonaj 16 elitarnych wojowników w chmurach.', requiredKills: 16, rewardRyo: 720, rewardExp: 310),
-  ShinobiMission(id: 'm_a2', rank: 'A', minRankIndex: 4, title: 'Obrona Konohy przed Inwazją', desc: 'Wyeliminuj 18 uderzeniowych shinobi wrogich wiosek.', requiredKills: 18, rewardRyo: 850, rewardExp: 370),
+  ShinobiMission(id: 'm_a2', rank: 'A', minRankIndex: 4, title: 'Obrona Konohy przed Inwazją', desc: 'Wyeliminuj 18 uderzeniowych shinobi.', requiredKills: 18, rewardRyo: 850, rewardExp: 370),
   ShinobiMission(id: 'm_a3', rank: 'A', minRankIndex: 4, title: 'Tajne Zlecenie Korzenia ANBU', desc: 'Dokonaj egzekucji 20 zdrajców Wioski.', requiredKills: 20, rewardRyo: 1000, rewardExp: 430),
 
   ShinobiMission(id: 'm_s1', rank: 'S', minRankIndex: 5, title: 'Ocalenie Świata przed Shinra Tensei', desc: 'Zgładź 22 bóstwa ścieżek bólu.', requiredKills: 22, rewardRyo: 1500, rewardExp: 650),
@@ -482,6 +511,7 @@ const NinjaGear defaultStarterWeapon = NinjaGear(name: 'Podstawowy Kunai', rarit
 const NinjaGear defaultStarterArmor = NinjaGear(name: 'Szata Treningowa Genina', rarity: ItemRarity.common, baseStat: 3, bonusEffect: 'Brak', bonusValue: 0, isSoulbound: true);
 const NinjaGear defaultStarterHelmet = NinjaGear(name: 'Ochraniacz Czołowy Protektor', rarity: ItemRarity.common, baseStat: 2, bonusEffect: 'Brak', bonusValue: 0, isSoulbound: true);
 const NinjaGear defaultStarterBoots = NinjaGear(name: 'Standardowe Sandały Shinobi', rarity: ItemRarity.common, baseStat: 2, bonusEffect: 'Brak', bonusValue: 0, isSoulbound: true);
+const NinjaGear defaultStarterTrinket = NinjaGear(name: 'Amulet Ochronny z Liścia', rarity: ItemRarity.common, baseStat: 2, bonusEffect: 'Brak', bonusValue: 0, isSoulbound: true);
 
 class ShinobiLooterApp extends StatelessWidget {
   const ShinobiLooterApp({super.key});
@@ -511,7 +541,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
   bool inVillage = true;
   int km = 0;
 
-  // SYSTEM HP I CZAKRY
   int hp = 100;
   int maxHp = 100;
   int chakra = 80;
@@ -521,18 +550,15 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
   int ryo = 60;
   int ninjaExp = 0;
   int masteryPoints = 0;
-  int passedRankIndex = 0; // 0: Nowicjusz, 1: Genin, 2: Chunin, 3: Tokubetsu, 4: Jonin, 5: Sannin
+  int passedRankIndex = 0;
   bool isLoading = true;
 
   int? activeMissionIndex;
   int currentMissionKills = 0;
   Set<String> completedMissionsHistory = {};
 
-  // PLECAK ZWYKŁY I ZAPROCIEWIONY (DUAL-STACK)
   Map<String, int> bag = {'c_pill': 2, 'c_dango': 1, 'c_kibaku': 1, 'c_smoke': 1};
   Map<String, int> sealedBag = {};
-
-  // MATERIAŁY RZEMIEŚLNICZE
   Map<String, int> craftingBag = {matIronOre: 2};
 
   List<Jutsu> equippedJutsu = [allJutsuPool[0]];
@@ -542,6 +568,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
   NinjaGear currentArmor = defaultStarterArmor;
   NinjaGear currentHelmet = defaultStarterHelmet;
   NinjaGear currentBoots = defaultStarterBoots;
+  NinjaGear currentTrinket = defaultStarterTrinket;
 
   final List<String> log = ['Witaj w Konohagakure! Pamiętaj o zabezpieczaniu rynsztunku u Mistrza Pieczęci.'];
 
@@ -556,7 +583,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     return softCapLevel;
   }
 
-  // Wzór: EXP = 130 * L^2.15
   static int expRequiredForLevel(int lvl) {
     if (lvl <= 1) return 0;
     return (130 * pow(lvl, 2.15)).floor();
@@ -598,8 +624,25 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     }
   }
 
-  int get totalAttack => currentWeapon.effectiveStat + currentWeapon.bonusValue + bonusAtk + (level * 2);
-  int get totalDefense => currentArmor.effectiveStat + currentArmor.bonusValue + currentHelmet.effectiveStat + currentHelmet.bonusValue + currentBoots.effectiveStat + currentBoots.bonusValue;
+  int get anbuSetCount => [currentWeapon, currentArmor, currentHelmet, currentBoots].where((g) => g.setGroup == 'anbu').length;
+  int get myobokuSetCount => [currentArmor, currentBoots].where((g) => g.setGroup == 'myoboku').length;
+  int get sandSetCount => [currentWeapon, currentArmor].where((g) => g.setGroup == 'sand').length;
+
+  int get setBonusAttack {
+    int bonus = 0;
+    if (anbuSetCount >= 2) bonus += 6;
+    if (anbuSetCount >= 4) bonus += 14;
+    return bonus;
+  }
+
+  int get setBonusDefense {
+    int bonus = 0;
+    if (sandSetCount >= 2) bonus += 8;
+    return bonus;
+  }
+
+  int get totalAttack => currentWeapon.effectiveStat + currentWeapon.bonusValue + currentTrinket.effectiveStat + bonusAtk + (level * 2) + setBonusAttack;
+  int get totalDefense => currentArmor.effectiveStat + currentArmor.bonusValue + currentHelmet.effectiveStat + currentHelmet.bonusValue + currentBoots.effectiveStat + currentBoots.bonusValue + setBonusDefense;
 
   @override
   void initState() {
@@ -648,6 +691,9 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       final bootsStr = prefs.getString('currentBoots');
       if (bootsStr != null) currentBoots = NinjaGear.fromJson(jsonDecode(bootsStr));
 
+      final trinketStr = prefs.getString('currentTrinket');
+      if (trinketStr != null) currentTrinket = NinjaGear.fromJson(jsonDecode(trinketStr));
+
       final knownIds = prefs.getStringList('knownJutsuIds');
       if (knownIds != null && knownIds.isNotEmpty) {
         knownJutsu = allJutsuPool.where((j) => knownIds.contains(j.id)).toList();
@@ -689,6 +735,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     await prefs.setString('currentArmor', jsonEncode(currentArmor.toJson()));
     await prefs.setString('currentHelmet', jsonEncode(currentHelmet.toJson()));
     await prefs.setString('currentBoots', jsonEncode(currentBoots.toJson()));
+    await prefs.setString('currentTrinket', jsonEncode(currentTrinket.toJson()));
     await prefs.setStringList('knownJutsuIds', knownJutsu.map((j) => j.id).toList());
     await prefs.setStringList('equippedJutsuIds', equippedJutsu.map((j) => j.id).toList());
   }
@@ -731,7 +778,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       km = 0;
       hp = maxHp;
       chakra = maxChakra;
-      bag.clear(); // Przepadają tylko niezapieczętowane!
+      bag.clear();
 
       if (!currentWeapon.isSoulbound) {
         currentWeapon = defaultStarterWeapon;
@@ -747,6 +794,10 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       }
       if (!currentBoots.isSoulbound) {
         currentBoots = defaultStarterBoots;
+        lostEquippedPieces++;
+      }
+      if (!currentTrinket.isSoulbound) {
+        currentTrinket = defaultStarterTrinket;
         lostEquippedPieces++;
       }
     });
@@ -783,7 +834,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
   }
 
   bool useConsumable(Consumable item) {
-    // W pierwszej kolejności zużywamy zwykłe zapasy, by chronić zapieczętowane
     bool fromUnsealed = (bag[item.id] ?? 0) > 0;
     bool fromSealed = (sealedBag[item.id] ?? 0) > 0;
 
@@ -847,7 +897,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       _startBattleWithEnemy(randomBoss, forcePrefix: EnemyPrefix.normal);
     } else if (roll < 62) {
       final randomEnemy = standardEnemiesPool[_rng.nextInt(standardEnemiesPool.length)];
-      // Losujemy prefiks przeciwnika
       final pRoll = _rng.nextInt(100);
       EnemyPrefix p = pRoll < 30 ? EnemyPrefix.weak : (pRoll < 80 ? EnemyPrefix.normal : EnemyPrefix.strong);
       _startBattleWithEnemy(randomEnemy, forcePrefix: p);
@@ -862,15 +911,14 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     }
   }
 
-  // MISTRZ PIECZĘCI (SPRZĘT + POJEDYNCZE ZAPASY)
   void _encounterSealMaster() {
     final unsealedSlots = <GearSlot, NinjaGear>{};
     if (!currentWeapon.isSoulbound) unsealedSlots[GearSlot.weapon] = currentWeapon;
     if (!currentArmor.isSoulbound) unsealedSlots[GearSlot.armor] = currentArmor;
     if (!currentHelmet.isSoulbound) unsealedSlots[GearSlot.helmet] = currentHelmet;
     if (!currentBoots.isSoulbound) unsealedSlots[GearSlot.boots] = currentBoots;
+    if (!currentTrinket.isSoulbound) unsealedSlots[GearSlot.trinket] = currentTrinket;
 
-    // Przedmioty w plecaku, które można zapieczętować (tylko 1 sztuka danego typu w sealedBag!)
     final sealableBagItems = bag.keys.where((id) => (sealedBag[id] ?? 0) == 0).toList();
 
     showDialog(
@@ -939,6 +987,9 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                           case GearSlot.boots:
                             slotName = 'Buty';
                             break;
+                          case GearSlot.trinket:
+                            slotName = 'Talizman';
+                            break;
                         }
 
                         return ListTile(
@@ -964,6 +1015,9 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                                           break;
                                         case GearSlot.boots:
                                           currentBoots = currentBoots.copyWith(isSoulbound: true);
+                                          break;
+                                        case GearSlot.trinket:
+                                          currentTrinket = currentTrinket.copyWith(isSoulbound: true);
                                           break;
                                       }
                                     });
@@ -1032,7 +1086,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     );
   }
 
-  // KOWAL WIOSKI KONOHA (ULEPSZENIA +1 DO +9)
   void _openBlacksmithDialog() {
     showDialog(
       context: context,
@@ -1043,6 +1096,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
             {'slot': 'Pancerz', 'gear': currentArmor, 'slotEnum': GearSlot.armor},
             {'slot': 'Głowa', 'gear': currentHelmet, 'slotEnum': GearSlot.helmet},
             {'slot': 'Buty', 'gear': currentBoots, 'slotEnum': GearSlot.boots},
+            {'slot': 'Talizman', 'gear': currentTrinket, 'slotEnum': GearSlot.trinket},
           ];
 
           return AlertDialog(
@@ -1061,7 +1115,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      '„Przekuj rynsztunek na wyższy poziom (+1..+9)! Do ulepszeń potrzebujesz odpowiednich rud czakry i Ryo.”',
+                      '„Przekuj rynsztunek na wyższy poziom (+1..+9)! Do ulepszeń potrzebujesz rud czakry i Ryo.”',
                       style: TextStyle(fontStyle: FontStyle.italic, fontSize: 11, color: Colors.white70),
                     ),
                     const SizedBox(height: 10),
@@ -1134,7 +1188,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                                             ryo -= ryoCost;
                                             craftingBag[neededMatId] = craftingBag[neededMatId]! - neededMatCount;
 
-                                            // Szansa na powodzenie kucia: 100% do +3, 80% do +6, 60% wyżej
                                             int successRate = curLvl < 3 ? 100 : (curLvl < 6 ? 80 : 60);
                                             bool success = _rng.nextInt(100) < successRate;
 
@@ -1159,6 +1212,9 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                                                 break;
                                               case GearSlot.boots:
                                                 currentBoots = upgraded;
+                                                break;
+                                              case GearSlot.trinket:
+                                                currentTrinket = upgraded;
                                                 break;
                                             }
                                           });
@@ -1330,8 +1386,19 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                               : null,
                         ),
                         ActionChip(
+                          avatar: const Text('🩹'),
+                          label: const Text('Bandaż (+30 HP, 28 Ryo)', style: TextStyle(fontSize: 10)),
+                          onPressed: ryo >= 28
+                              ? () {
+                                  setState(() => ryo -= 28);
+                                  addConsumableToBag('c_bandage', 1);
+                                  setMedicState(() {});
+                                }
+                              : null,
+                        ),
+                        ActionChip(
                           avatar: const Text('🧴'),
-                          label: const Text('Balsam (+50 HP, 45 Ryo)', style: TextStyle(fontSize: 10)),
+                          label: const Text('Balsam (+55 HP, 45 Ryo)', style: TextStyle(fontSize: 10)),
                           onPressed: ryo >= 45
                               ? () {
                                   setState(() => ryo -= 45);
@@ -1449,7 +1516,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     );
   }
 
-  // WALKA (W TRAKCIE RAJDU LUB NA ARENIE EGZAMINACYJNEJ)
   void _startBattleWithEnemy(
     EnemyTemplate template, {
     EnemyPrefix forcePrefix = EnemyPrefix.normal,
@@ -1499,6 +1565,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     int burnTurns = 0;
     int burnDmg = 0;
     int frozenTurns = 0;
+    bool hasTrinketDeathDefyUsed = false;
 
     showModalBottomSheet(
       context: context,
@@ -1518,6 +1585,12 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                 return;
               }
 
+              if (myobokuSetCount >= 2) {
+                setState(() {
+                  chakra = min(maxChakra, chakra + 4);
+                });
+              }
+
               final rawDmg = enemyBaseAtk + _rng.nextInt(4);
               final dmg = max(2, rawDmg - (totalDefense ~/ 2));
 
@@ -1527,13 +1600,20 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
               battleMsg = '${template.name} zadaje $dmg dmg witalnych! (Twoja Obrona: $totalDefense)';
               _saveGameData();
 
+              if (hp <= 0 && currentTrinket.name.contains('Naszyjnik Pierwszego') && !hasTrinketDeathDefyUsed) {
+                hasTrinketDeathDefyUsed = true;
+                setState(() {
+                  hp = 1;
+                });
+                battleMsg += '\n💎 Cud! Naszyjnik Pierwszego Hokage ocalił twoje życie (1 HP)!';
+                setBattleState(() {});
+                return;
+              }
+
               if (hp <= 0) {
                 Navigator.pop(ctx);
                 if (isExamFight) {
-                  // Porażka na egzaminie w wiosce nie niszczy ekwipunku!
-                  setState(() {
-                    hp = 1;
-                  });
+                  setState(() => hp = 1);
                   addLog('❌ Egzamin oblany! Medyk wioskowy opatrzył twoje stłuczenia.');
                 } else {
                   returnToVillage(fallenInBattle: true);
@@ -1603,9 +1683,12 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   return;
                 }
 
-                final rewardRyo = template.isBoss
-                    ? (80 + km * 2)
-                    : ((12 + km) * (forcePrefix == EnemyPrefix.strong ? 1.6 : (forcePrefix == EnemyPrefix.weak ? 0.8 : 1.0))).round();
+                double ryoMultiplier = currentTrinket.name.contains('Akatsuki') ? 1.3 : 1.0;
+                final rewardRyo = ((template.isBoss
+                        ? (80 + km * 2)
+                        : ((12 + km) * (forcePrefix == EnemyPrefix.strong ? 1.6 : (forcePrefix == EnemyPrefix.weak ? 0.8 : 1.0))).round()) *
+                    ryoMultiplier).round();
+
                 final expGained = template.isBoss
                     ? (18 + (km ~/ 5) * 4)
                     : ((4 + (km ~/ 5) * 1) * (forcePrefix == EnemyPrefix.strong ? 1.6 : (forcePrefix == EnemyPrefix.weak ? 0.8 : 1.0))).round();
@@ -1617,7 +1700,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                 addExperience(expGained);
                 addLog('🏆 Pokonano: $prefixTitle${template.name}! Zdobyto $rewardRyo Ryo i +$expGained EXP.');
 
-                // Szansa na rudę z pokonanego wroga
                 if (template.isBoss || forcePrefix == EnemyPrefix.strong || _rng.nextInt(100) < 25) {
                   final mRoll = _rng.nextInt(100);
                   String droppedMat = mRoll < 60 ? matIronOre : (mRoll < 90 ? matSteel : matCrystal);
@@ -1636,7 +1718,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
               int totalAvailable = (bag[item.id] ?? 0) + (sealedBag[item.id] ?? 0);
               if (totalAvailable <= 0) return;
 
-              // Zużycie przedmiotu
               if ((bag[item.id] ?? 0) > 0) {
                 bag[item.id] = bag[item.id]! - 1;
                 if (bag[item.id] == 0) bag.remove(item.id);
@@ -1701,7 +1782,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                     minHeight: 6,
                   ),
                   const SizedBox(height: 8),
-                  // Paski gracza w walce
                   Row(
                     children: [
                       const Text('❤️ HP: ', style: TextStyle(fontSize: 10, color: Colors.redAccent)),
@@ -1808,17 +1888,20 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
 
     if (rarity == ItemRarity.legendary) {
       final legPool = legendaryArtifactsPool.where((g) => g.slot == slot).toList();
-      final template = legPool[_rng.nextInt(legPool.length)];
-      final statScaling = (km * 0.05).round();
+      if (legPool.isNotEmpty) {
+        final template = legPool[_rng.nextInt(legPool.length)];
+        final statScaling = (km * 0.05).round();
 
-      return NinjaGear(
-        name: template.name,
-        rarity: ItemRarity.legendary,
-        baseStat: template.baseStat + statScaling,
-        bonusEffect: template.bonusEffect,
-        bonusValue: template.bonusValue,
-        isSoulbound: false,
-      );
+        return NinjaGear(
+          name: template.name,
+          rarity: ItemRarity.legendary,
+          baseStat: template.baseStat + statScaling,
+          bonusEffect: template.bonusEffect,
+          bonusValue: template.bonusValue,
+          setGroup: template.setGroup,
+          isSoulbound: false,
+        );
+      }
     }
 
     final availableArchetypes = standardArchetypesPool.where((g) => g.slot == slot).toList();
@@ -1862,14 +1945,15 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       baseStat: calculatedStat,
       bonusEffect: bonusAffix,
       bonusValue: bonusVal,
+      setGroup: baseArch.setGroup,
       isSoulbound: false,
     );
   }
 
   void _findLoot({bool guaranteedBossDrop = false}) {
     final roll = _rng.nextInt(100);
-    if (roll < 18 || guaranteedBossDrop) {
-      final slotIndex = _rng.nextInt(4);
+    if (roll < 20 || guaranteedBossDrop) {
+      final slotIndex = _rng.nextInt(5);
       final slot = GearSlot.values[slotIndex];
       final drop = _generateRandomGear(slot: slot, guaranteedBossDrop: guaranteedBossDrop);
 
@@ -1887,11 +1971,13 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
         case GearSlot.boots:
           currentGear = currentBoots;
           break;
+        case GearSlot.trinket:
+          currentGear = currentTrinket;
+          break;
       }
 
       _showEquipDialog(newGear: drop, currentGear: currentGear, slot: slot);
-    } else if (roll < 45) {
-      // Znalezienie surowca kuźniczego
+    } else if (roll < 48) {
       final mRoll = _rng.nextInt(100);
       String droppedMat = mRoll < 65 ? matIronOre : (mRoll < 92 ? matSteel : matCrystal);
       addCraftingMaterial(droppedMat, 1);
@@ -1903,7 +1989,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     }
   }
 
-  // ZAAWANSOWANY POPUP PORÓWNANIA ZE STAT DELTA & RZADKOŚCIĄ
+  // INTERAKTYWNY POPUP PORÓWNANIA ZE WŁAŚCIWOŚCIAMI I WYBOREM PRZEZ KLIKNIĘCIE W PRZEDMIOT
   void _showEquipDialog({required NinjaGear newGear, required NinjaGear currentGear, required GearSlot slot}) {
     String slotName;
     String statType;
@@ -1924,126 +2010,202 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
         slotName = 'Buty';
         statType = 'Obrona';
         break;
+      case GearSlot.trinket:
+        slotName = 'Talizman';
+        statType = 'Moc';
+        break;
     }
 
     final int diff = newGear.effectiveStat - currentGear.effectiveStat;
     final String diffSign = diff > 0 ? '+$diff' : '$diff';
     final Color diffColor = diff > 0 ? Colors.greenAccent : (diff < 0 ? Colors.redAccent : Colors.grey);
 
+    void equipNew() {
+      setState(() {
+        switch (slot) {
+          case GearSlot.weapon:
+            currentWeapon = newGear;
+            break;
+          case GearSlot.armor:
+            currentArmor = newGear;
+            break;
+          case GearSlot.helmet:
+            currentHelmet = newGear;
+            break;
+          case GearSlot.boots:
+            currentBoots = newGear;
+            break;
+          case GearSlot.trinket:
+            currentTrinket = newGear;
+            break;
+        }
+      });
+      _saveGameData();
+      Navigator.pop(context);
+      addLog('✨ Założono: ${newGear.displayName} (Wymaga pieczęci!)');
+    }
+
+    void keepOld() {
+      Navigator.pop(context);
+      addLog('Odrzucono: ${newGear.displayName}.');
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF1E1C1A),
-        title: Text('Odnaleziono: $slotName!', style: const TextStyle(color: Colors.orangeAccent)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // NOWY PRZEDMIOT
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black38,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: newGear.color.withAlpha(150), width: 1.2),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('NOWY PRZEDMIOT', style: TextStyle(fontSize: 9, color: newGear.color, fontWeight: FontWeight.bold)),
-                      Text(newGear.rarityLabel, style: TextStyle(fontSize: 9, color: newGear.color)),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(newGear.displayName, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: newGear.color)),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text('$statType: +${newGear.effectiveStat} ', style: const TextStyle(fontSize: 11, color: Colors.white70)),
-                      Text('($diffSign)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: diffColor)),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  const Text('Status: ⚠️ Niezabezpieczony (Przepada!)', style: TextStyle(fontSize: 9, color: Colors.redAccent)),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            // AKTUALNY PRZEDMIOT
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black26,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: currentGear.isSoulbound ? Colors.amberAccent : currentGear.color.withAlpha(100)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text('AKTUALNIE ZAŁOŻONY', style: TextStyle(fontSize: 9, color: Colors.white54, fontWeight: FontWeight.bold)),
-                      Text(currentGear.rarityLabel, style: TextStyle(fontSize: 9, color: currentGear.color)),
-                    ],
-                  ),
-                  const SizedBox(height: 3),
-                  Text(currentGear.displayName, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: currentGear.color)),
-                  const SizedBox(height: 4),
-                  Text('$statType: +${currentGear.effectiveStat}', style: const TextStyle(fontSize: 11, color: Colors.white70)),
-                  const SizedBox(height: 2),
-                  Text(
-                    currentGear.isSoulbound ? 'Status: 📜 Zapieczętowany (Bezpieczny)' : 'Status: ⚠️ Niezabezpieczony',
-                    style: TextStyle(fontSize: 9, color: currentGear.isSoulbound ? Colors.greenAccent : Colors.redAccent),
-                  ),
-                ],
-              ),
-            ),
+            Text('Odnaleziono: $slotName!', style: const TextStyle(color: Colors.orangeAccent, fontSize: 18, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 2),
+            const Text('Dotknij przedmiotu, który chcesz zachować:', style: TextStyle(color: Colors.white60, fontSize: 10)),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Zostaw stary')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade900),
-            onPressed: () {
-              setState(() {
-                switch (slot) {
-                  case GearSlot.weapon:
-                    currentWeapon = newGear;
-                    break;
-                  case GearSlot.armor:
-                    currentArmor = newGear;
-                    break;
-                  case GearSlot.helmet:
-                    currentHelmet = newGear;
-                    break;
-                  case GearSlot.boots:
-                    currentBoots = newGear;
-                    break;
-                }
-              });
-              _saveGameData();
-              Navigator.pop(ctx);
-              addLog('✨ Założono: ${newGear.name} (Wymaga pieczęci!)');
-            },
-            child: const Text('Załóż nowy'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // KARTA: NOWY PRZEDMIOT (KLIKALNA)
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: equipNew,
+                  borderRadius: BorderRadius.circular(10),
+                  splashColor: Colors.orange.withAlpha(80),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.black45,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: newGear.color.withAlpha(200), width: 1.5),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('NOWY PRZEDMIOT', style: TextStyle(fontSize: 10, color: newGear.color, fontWeight: FontWeight.bold)),
+                            Text(newGear.rarityLabel, style: TextStyle(fontSize: 9, color: newGear.color)),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(newGear.displayName, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: newGear.color)),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Text('$statType: +${newGear.effectiveStat} ', style: const TextStyle(fontSize: 12, color: Colors.white)),
+                            Text('($diffSign)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: diffColor)),
+                          ],
+                        ),
+                        if (newGear.bonusEffect != 'Brak') ...[
+                          const SizedBox(height: 3),
+                          Text('✦ Właściwość: ${newGear.bonusEffect} (+${newGear.bonusValue})',
+                              style: const TextStyle(fontSize: 10, color: Colors.amberAccent, fontWeight: FontWeight.w600)),
+                        ],
+                        if (newGear.setGroup != 'none') ...[
+                          const SizedBox(height: 2),
+                          Text('⚡ Zestaw: ${newGear.setGroup.toUpperCase()}',
+                              style: const TextStyle(fontSize: 9, color: Colors.cyanAccent)),
+                        ],
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('⚠️ Przepada po powrocie', style: TextStyle(fontSize: 9, color: Colors.redAccent)),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: const Color(0xFFC44D00), borderRadius: BorderRadius.circular(4)),
+                              child: const Text('Dotknij by ZAŁOŻYĆ', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // KARTA: STARY PRZEDMIOT (KLIKALNA)
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: keepOld,
+                  borderRadius: BorderRadius.circular(10),
+                  splashColor: Colors.grey.withAlpha(80),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.black26,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: currentGear.isSoulbound ? Colors.amberAccent : currentGear.color.withAlpha(120),
+                        width: currentGear.isSoulbound ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('AKTUALNIE ZAŁOŻONY', style: TextStyle(fontSize: 10, color: Colors.white54, fontWeight: FontWeight.bold)),
+                            Text(currentGear.rarityLabel, style: TextStyle(fontSize: 9, color: currentGear.color)),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(currentGear.displayName, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: currentGear.color)),
+                        const SizedBox(height: 4),
+                        Text('$statType: +${currentGear.effectiveStat}', style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                        if (currentGear.bonusEffect != 'Brak') ...[
+                          const SizedBox(height: 3),
+                          Text('✦ Właściwość: ${currentGear.bonusEffect} (+${currentGear.bonusValue})',
+                              style: const TextStyle(fontSize: 10, color: Colors.amberAccent, fontWeight: FontWeight.w600)),
+                        ],
+                        if (currentGear.setGroup != 'none') ...[
+                          const SizedBox(height: 2),
+                          Text('⚡ Zestaw: ${currentGear.setGroup.toUpperCase()}',
+                              style: const TextStyle(fontSize: 9, color: Colors.cyanAccent)),
+                        ],
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              currentGear.isSoulbound ? '📜 Zapieczętowany (Bezpieczny)' : '⚠️ Niezabezpieczony',
+                              style: TextStyle(fontSize: 9, color: currentGear.isSoulbound ? Colors.greenAccent : Colors.redAccent),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(4)),
+                              child: const Text('Dotknij by ZACHOWAĆ', style: TextStyle(fontSize: 9, color: Colors.white70)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  // BIURO MISJI W WIOSCE (PRZYJMOWANIE ZLECEŃ + EGZAMINY)
   void _openVillageMissionsDialog() {
     showDialog(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setMissionState) {
-          // Szukamy następnego egzaminu do zdania
           final nextExam = shinobiExams.firstWhere(
             (e) => e.targetRankIndex == passedRankIndex + 1,
             orElse: () => shinobiExams.last,
@@ -2060,7 +2222,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // SEKCJA EGZAMINU KWALIFIKACYJNEGO
                     if (passedRankIndex < 5) ...[
                       Container(
                         padding: const EdgeInsets.all(8),
@@ -2229,7 +2390,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     );
   }
 
-  // W TERENIE: TYLKO PODGLĄD AKTYWNEJ MISJI
   void _openFieldMissionStatusDialog() {
     showDialog(
       context: context,
@@ -2272,7 +2432,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     );
   }
 
-  // PLECAK RAJDU Z PODZIAŁEM NA ZABEZPIECZONE I RYZYKOWNE
   void _openBagDialog() {
     showDialog(
       context: context,
@@ -2443,7 +2602,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       ),
       body: Column(
         children: [
-          // PANEL STATYSTYK GRACZA
           Container(
             padding: const EdgeInsets.all(10),
             color: const Color(0xFF1C1A18),
@@ -2472,14 +2630,36 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   children: [
                     _itemCard('Głowa', currentHelmet, 'Obr: +${currentHelmet.effectiveStat}'),
                     const SizedBox(width: 6),
-                    _itemCard('Buty', currentBoots, 'Obr: +${currentBoots.effectiveStat} (Suma: $totalDefense)'),
+                    _itemCard('Buty', currentBoots, 'Obr: +${currentBoots.effectiveStat}'),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    _itemCard('Talizman', currentTrinket, 'Moc: +${currentTrinket.effectiveStat}'),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(6), border: Border.all(color: Colors.white12)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Aktywne Zestawy:', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.orangeAccent)),
+                            Text(
+                              anbuSetCount >= 2 ? 'ANBU ($anbuSetCount/4): +$setBonusAttack Atak' : (sandSetCount >= 2 ? 'Piasek ($sandSetCount/2): +8 Obrona' : (myobokuSetCount >= 2 ? 'Myōboku (2/2): +4 CP/turę' : 'Brak aktywnych')),
+                              style: const TextStyle(fontSize: 8, color: Colors.greenAccent),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
 
-          // PRZYCISKI MENU WIOSKI (TYLKO W WIOSCE)
           if (inVillage)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -2549,7 +2729,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
             child: Align(alignment: Alignment.centerLeft, child: Text('Dziennik:', style: TextStyle(color: Colors.grey, fontSize: 11))),
           ),
 
-          // DZIENNIK ZDARZEŃ
           Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
@@ -2565,14 +2744,12 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
             ),
           ),
 
-          // ERGONOMICZNA STREFA DOLNA DLA JEDNEJ RĘKI (W TRAKCIE RAJDU)
           if (!inVillage)
             Container(
               padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Pasek pomocniczy: Plecak, Podgląd Misji (Tylko status!), Ucieczka
                   Row(
                     children: [
                       Expanded(
@@ -2619,7 +2796,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  // GŁÓWNY PRZYCISK DALEJ NA SAMYM DOLE (ONE-HAND MODE)
                   SizedBox(
                     width: double.infinity,
                     height: 54,
