@@ -15,21 +15,6 @@ const String matIronOre = 'mat_iron_ore';
 const String matSteel = 'mat_steel';
 const String matCrystal = 'mat_crystal';
 
-const String bgHokageUrl = 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=70';
-
-Widget buildIconOrEmoji({required String? url, required String emoji, double size = 22}) {
-  if (url == null || url.isEmpty) {
-    return Text(emoji, style: TextStyle(fontSize: size * 0.8));
-  }
-  return Image.network(
-    url,
-    width: size,
-    height: size,
-    fit: BoxFit.contain,
-    errorBuilder: (context, error, stackTrace) => Text(emoji, style: TextStyle(fontSize: size * 0.8)),
-  );
-}
-
 class CraftingMaterialInfo {
   final String id;
   final String name;
@@ -251,7 +236,6 @@ class Consumable {
   final int value;
   final int price;
   final String icon;
-  final String? imageUrl;
 
   const Consumable({
     required this.id,
@@ -262,7 +246,6 @@ class Consumable {
     required this.value,
     required this.price,
     required this.icon,
-    this.imageUrl,
   });
 }
 
