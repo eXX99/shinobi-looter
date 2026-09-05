@@ -15,110 +15,19 @@ const String matIronOre = 'mat_iron_ore';
 const String matSteel = 'mat_steel';
 const String matCrystal = 'mat_crystal';
 
-class NinjaAssetUrls {
-  static const String bgHokagePrimary = 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=1200&q=80';
-  static const String bgHokageBackup = 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Mount_Rushmore_National_Memorial.jpg/1200px-Mount_Rushmore_National_Memorial.jpg';
+const String bgHokageUrl = 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=70';
 
-  static const Map<String, List<String>> consumableIcons = {
-    'c_pill': [
-      'https://cdn-icons-png.flaticon.com/128/883/883360.png',
-      'https://cdn-icons-png.flaticon.com/128/3004/3004458.png'
-    ],
-    'c_dango': [
-      'https://cdn-icons-png.flaticon.com/128/3361/3361376.png',
-      'https://cdn-icons-png.flaticon.com/128/1046/1046784.png'
-    ],
-    'c_bandage': [
-      'https://cdn-icons-png.flaticon.com/128/2965/2965567.png',
-      'https://cdn-icons-png.flaticon.com/128/883/883407.png'
-    ],
-    'c_ointment': [
-      'https://cdn-icons-png.flaticon.com/128/883/883407.png',
-      'https://cdn-icons-png.flaticon.com/128/3004/3004458.png'
-    ],
-    'c_ramen': [
-      'https://cdn-icons-png.flaticon.com/128/1046/1046784.png',
-      'https://cdn-icons-png.flaticon.com/128/3361/3361376.png'
-    ],
-    'c_kibaku': [
-      'https://cdn-icons-png.flaticon.com/128/599/599502.png',
-      'https://cdn-icons-png.flaticon.com/128/1161/1161388.png'
-    ],
-    'c_smoke': [
-      'https://cdn-icons-png.flaticon.com/128/414/414927.png',
-      'https://cdn-icons-png.flaticon.com/128/3208/3208720.png'
-    ],
-  };
-
-  static const Map<String, List<String>> enemyAvatars = {
-    'Zabuza Momochi': [
-      'https://api.dicebear.com/7.x/bottts/png?seed=Zabuza',
-      'https://robohash.org/Zabuza?set=set2'
-    ],
-    'Haku': [
-      'https://api.dicebear.com/7.x/bottts/png?seed=Haku',
-      'https://robohash.org/Haku?set=set2'
-    ],
-    'Gaara Pustyni': [
-      'https://api.dicebear.com/7.x/bottts/png?seed=Gaara',
-      'https://robohash.org/Gaara?set=set2'
-    ],
-    'Madara Uchiha': [
-      'https://api.dicebear.com/7.x/bottts/png?seed=Madara',
-      'https://robohash.org/Madara?set=set2'
-    ],
-    'Kakashi Hatake': [
-      'https://api.dicebear.com/7.x/bottts/png?seed=Kakashi',
-      'https://robohash.org/Kakashi?set=set2'
-    ],
-  };
-}
-
-class NinjaImage extends StatelessWidget {
-  final String primaryUrl;
-  final String? backupUrl;
-  final String fallbackEmoji;
-  final double? width;
-  final double? height;
-  final double emojiSize;
-  final BoxFit fit;
-
-  const NinjaImage({
-    super.key,
-    required this.primaryUrl,
-    this.backupUrl,
-    required this.fallbackEmoji,
-    this.width,
-    this.height,
-    this.emojiSize = 20,
-    this.fit = BoxFit.contain,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (primaryUrl.isEmpty) {
-      return Text(fallbackEmoji, style: TextStyle(fontSize: emojiSize));
-    }
-
-    return Image.network(
-      primaryUrl,
-      width: width,
-      height: height,
-      fit: fit,
-      errorBuilder: (ctx, err, stack) {
-        if (backupUrl != null && backupUrl!.isNotEmpty) {
-          return Image.network(
-            backupUrl!,
-            width: width,
-            height: height,
-            fit: fit,
-            errorBuilder: (ctx2, err2, stack2) => Text(fallbackEmoji, style: TextStyle(fontSize: emojiSize)),
-          );
-        }
-        return Text(fallbackEmoji, style: TextStyle(fontSize: emojiSize));
-      },
-    );
+Widget buildIconOrEmoji({required String? url, required String emoji, double size = 22}) {
+  if (url == null || url.isEmpty) {
+    return Text(emoji, style: TextStyle(fontSize: size * 0.8));
   }
+  return Image.network(
+    url,
+    width: size,
+    height: size,
+    fit: BoxFit.contain,
+    errorBuilder: (context, error, stackTrace) => Text(emoji, style: TextStyle(fontSize: size * 0.8)),
+  );
 }
 
 class CraftingMaterialInfo {
@@ -342,6 +251,7 @@ class Consumable {
   final int value;
   final int price;
   final String icon;
+  final String? imageUrl;
 
   const Consumable({
     required this.id,
@@ -352,6 +262,7 @@ class Consumable {
     required this.value,
     required this.price,
     required this.icon,
+    this.imageUrl,
   });
 }
 
@@ -1058,19 +969,11 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                       ...sealableBagItems.map((id) {
                         final item = allConsumables.firstWhere((c) => c.id == id);
                         final cost = 40 + (item.price * 0.7).round();
-                        final iconUrls = NinjaAssetUrls.consumableIcons[id] ?? [];
 
                         return ListTile(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
-                          leading: NinjaImage(
-                            primaryUrl: iconUrls.isNotEmpty ? iconUrls[0] : '',
-                            backupUrl: iconUrls.length > 1 ? iconUrls[1] : null,
-                            fallbackEmoji: item.icon,
-                            width: 24,
-                            height: 24,
-                            emojiSize: 18,
-                          ),
+                          leading: Text(item.icon, style: const TextStyle(fontSize: 20)),
                           title: Text(item.name, style: const TextStyle(fontSize: 11)),
                           subtitle: Text('Pieczęć: $cost Ryo', style: const TextStyle(fontSize: 9, color: Color(0xFFFFD54F))),
                           trailing: ElevatedButton(
@@ -1580,8 +1483,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     int frozenTurns = 0;
     bool hasTrinketDeathDefyUsed = false;
 
-    final avatarUrls = NinjaAssetUrls.enemyAvatars[template.name] ?? [];
-
     showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -1815,19 +1716,11 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                           itemBuilder: (_, i) {
                             final itm = healableItems[i];
                             final qty = (bag[itm.id] ?? 0) + (sealedBag[itm.id] ?? 0);
-                            final iconUrls = NinjaAssetUrls.consumableIcons[itm.id] ?? [];
 
                             return ListTile(
                               dense: true,
                               contentPadding: EdgeInsets.zero,
-                              leading: NinjaImage(
-                                primaryUrl: iconUrls.isNotEmpty ? iconUrls[0] : '',
-                                backupUrl: iconUrls.length > 1 ? iconUrls[1] : null,
-                                fallbackEmoji: itm.icon,
-                                width: 24,
-                                height: 24,
-                                emojiSize: 18,
-                              ),
+                              leading: Text(itm.icon, style: const TextStyle(fontSize: 22)),
                               title: Text('${itm.name} (x$qty)', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                               subtitle: Text('${itm.statBonusText} • ${itm.description}', style: const TextStyle(fontSize: 10, color: Color(0xFF69F0AE))),
                               trailing: ElevatedButton(
@@ -1866,20 +1759,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                     children: [
                       Row(
                         children: [
-                          if (avatarUrls.isNotEmpty) ...[
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: NinjaImage(
-                                primaryUrl: avatarUrls[0],
-                                backupUrl: avatarUrls.length > 1 ? avatarUrls[1] : null,
-                                fallbackEmoji: template.isBoss ? '🥷' : '🐾',
-                                width: 36,
-                                height: 36,
-                                emojiSize: 22,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
+                          Text(template.isBoss ? '🥷 ' : '🐾 ', style: const TextStyle(fontSize: 24)),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -2617,7 +2497,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                         final int unsealedQty = bag[id] ?? 0;
                         final int sealedQty = sealedBag[id] ?? 0;
                         final bool isCombatOnly = item.type == ConsumableType.directDmg || item.type == ConsumableType.smokeEscape;
-                        final iconUrls = NinjaAssetUrls.consumableIcons[id] ?? [];
 
                         return Container(
                           margin: const EdgeInsets.symmetric(vertical: 4),
@@ -2626,14 +2505,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              NinjaImage(
-                                primaryUrl: iconUrls.isNotEmpty ? iconUrls[0] : '',
-                                backupUrl: iconUrls.length > 1 ? iconUrls[1] : null,
-                                fallbackEmoji: item.icon,
-                                width: 24,
-                                height: 24,
-                                emojiSize: 18,
-                              ),
+                              Text(item.icon, style: const TextStyle(fontSize: 22)),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
@@ -2792,11 +2664,18 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                       ).createShader(rect);
                     },
                     blendMode: BlendMode.darken,
-                    child: const NinjaImage(
-                      primaryUrl: NinjaAssetUrls.bgHokagePrimary,
-                      backupUrl: NinjaAssetUrls.bgHokageBackup,
-                      fallbackEmoji: '',
+                    child: Image.network(
+                      bgHokageUrl,
                       fit: BoxFit.cover,
+                      errorBuilder: (ctx, err, stack) => Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0xFF0D241C), Color(0xFF141211)],
+                          ),
+                        ),
+                      ),
                     ),
                   )
                 : Container(
