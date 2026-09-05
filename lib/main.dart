@@ -2638,26 +2638,12 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
         children: [
           Positioned.fill(
             child: inVillage
-                ? ShaderMask(
-                    shaderCallback: (rect) {
-                      return const LinearGradient(
+                ? Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.black54, Color(0xFF0F0E0D)],
-                      ).createShader(rect);
-                    },
-                    blendMode: BlendMode.darken,
-                    child: Image.network(
-                      bgHokageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (ctx, err, stack) => Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Color(0xFF0D241C), Color(0xFF141211)],
-                          ),
-                        ),
+                        colors: [Color(0xFF0D241C), Color(0xFF141211)],
                       ),
                     ),
                   )
@@ -2689,7 +2675,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 0.8),
                       ),
                       Text(
-                        inVillage ? '⛰️ Góra Hokage' : '🌲 Las Kraju Ognia',
+                        inVillage ? '⛰️ Brama Liścia' : '🌲 Las Kraju Ognia',
                         style: const TextStyle(fontSize: 12, color: Colors.white60),
                       ),
                     ],
