@@ -15,6 +15,124 @@ const String matIronOre = 'mat_iron_ore';
 const String matSteel = 'mat_steel';
 const String matCrystal = 'mat_crystal';
 
+// BAZA LINKÓW GRAFIK (GŁÓWNY + ZAPASOWY CDN + FALLBACK EMOJI)
+class NinjaAssetUrls {
+  // Tło Góry Hokage
+  static const String bgHokagePrimary = 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=1200&q=80';
+  static const String bgHokageBackup = 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Mount_Rushmore_National_Memorial.jpg/1200px-Mount_Rushmore_National_Memorial.jpg';
+
+  // Ikony prowiantu / przedmiotów
+  static const Map<String, List<String>> consumableIcons = {
+    'c_pill': [
+      'https://raw.githubusercontent.com/feathericons/feather/master/icons/disc.svg',
+      'https://cdn-icons-png.flaticon.com/128/883/883360.png'
+    ],
+    'c_dango': [
+      'https://cdn-icons-png.flaticon.com/128/3361/3361376.png',
+      'https://cdn-icons-png.flaticon.com/128/1046/1046784.png'
+    ],
+    'c_bandage': [
+      'https://cdn-icons-png.flaticon.com/128/2965/2965567.png',
+      'https://cdn-icons-png.flaticon.com/128/883/883407.png'
+    ],
+    'c_ointment': [
+      'https://cdn-icons-png.flaticon.com/128/883/883407.png',
+      'https://cdn-icons-png.flaticon.com/128/3004/3004458.png'
+    ],
+    'c_ramen': [
+      'https://cdn-icons-png.flaticon.com/128/1046/1046784.png',
+      'https://cdn-icons-png.flaticon.com/128/3361/3361376.png'
+    ],
+    'c_kibaku': [
+      'https://cdn-icons-png.flaticon.com/128/599/599502.png',
+      'https://cdn-icons-png.flaticon.com/128/1161/1161388.png'
+    ],
+    'c_smoke': [
+      'https://cdn-icons-png.flaticon.com/128/414/414927.png',
+      'https://cdn-icons-png.flaticon.com/128/3208/3208720.png'
+    ],
+  };
+
+  // Portrety wrogów / bossów
+  static const Map<String, List<String>> enemyAvatars = {
+    'Zabuza Momochi': [
+      'https://api.dicebear.com/7.x/bottts/png?seed=Zabuza',
+      'https://robohash.org/Zabuza?set=set2'
+    ],
+    'Haku': [
+      'https://api.dicebear.com/7.x/bottts/png?seed=Haku',
+      'https://robohash.org/Haku?set=set2'
+    ],
+    'Gaara Pustyni': [
+      'https://api.dicebear.com/7.x/bottts/png?seed=Gaara',
+      'https://robohash.org/Gaara?set=set2'
+    ],
+    'Madara Uchiha': [
+      'https://api.dicebear.com/7.x/bottts/png?seed=Madara',
+      'https://robohash.org/Madara?set=set2'
+    ],
+    'Kakashi Hatake': [
+      'https://api.dicebear.com/7.x/bottts/png?seed=Kakashi',
+      'https://robohash.org/Kakashi?set=set2'
+    ],
+  };
+}
+
+// WIDŻET KASKADOWEGO ŁADOWANIA OBRAZÓW (PRIMARY -> BACKUP -> EMOJI FALLBACK)
+class NinjaImage extends StatefulWidget {
+  final String primaryUrl;
+  final String? backupUrl;
+  final String fallbackEmoji;
+  final double size;
+  final BoxFit fit;
+
+  const NinjaImage({
+    super.key,
+    required this.primaryUrl,
+    this.backupUrl,
+    required this.fallbackEmoji,
+    this.size = 28,
+    this.fit = BoxFit.contain,
+  });
+
+  @override
+  State<NinjaImage> createState() => _NinjaImageState();
+}
+
+class _NinjaImageState extends State<NinjaImage> {
+  int _attempt = 0; // 0: primary, 1: backup, 2: fallback
+
+  @override
+  Widget build(BuildContext context) {
+    if (_attempt == 2 || widget.primaryUrl.isEmpty) {
+      return Text(widget.fallbackEmoji, style: TextStyle(fontSize: widget.size * 0.75));
+    }
+
+    final currentUrl = _attempt == 0 ? widget.primaryUrl : (widget.backupUrl ?? '');
+
+    if (currentUrl.isEmpty) {
+      return Text(widget.fallbackEmoji, style: TextStyle(fontSize: widget.size * 0.75));
+    }
+
+    return Image.network(
+      currentUrl,
+      width: widget.size,
+      height: widget.size,
+      fit: widget.fit,
+      errorBuilder: (context, error, stackTrace) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            setState(() {
+              _attempt++;
+            });
+          }
+        });
+        return Text(widget.fallbackEmoji, style: TextStyle(fontSize: widget.size * 0.75));
+      },
+    );
+  }
+}
+
 class CraftingMaterialInfo {
   final String id;
   final String name;
@@ -952,11 +1070,17 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                       ...sealableBagItems.map((id) {
                         final item = allConsumables.firstWhere((c) => c.id == id);
                         final cost = 40 + (item.price * 0.7).round();
+                        final iconUrls = NinjaAssetUrls.consumableIcons[id] ?? [];
 
                         return ListTile(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
-                          leading: Text(item.icon, style: const TextStyle(fontSize: 18)),
+                          leading: NinjaImage(
+                            primaryUrl: iconUrls.isNotEmpty ? iconUrls[0] : '',
+                            backupUrl: iconUrls.length > 1 ? iconUrls[1] : null,
+                            fallbackEmoji: item.icon,
+                            size: 24,
+                          ),
                           title: Text(item.name, style: const TextStyle(fontSize: 11)),
                           subtitle: Text('Pieczęć: $cost Ryo', style: const TextStyle(fontSize: 9, color: Color(0xFFFFD54F))),
                           trailing: ElevatedButton(
@@ -1025,7 +1149,8 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
               width: double.maxFinite,
               child: SingleChildScrollView(
                 child: Column(
-                  mainAxisSize: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('„Przekuj rynsztunek na wyższy poziom (+1..+9)! Do ulepszeń potrzebujesz rud czakry i Ryo.”', style: TextStyle(fontStyle: FontStyle.italic, fontSize: 11, color: Colors.white70)),
                     const SizedBox(height: 10),
@@ -1414,6 +1539,1241 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     );
   }
 
+  void _startBattleWithEnemy(
+    EnemyTemplate template, {
+    EnemyPrefix forcePrefix = EnemyPrefix.normal,
+    bool isExamFight = false,
+    int? examTargetRank,
+  }) {
+    final kmScale = (km * 0.20).round();
+
+    double hpMult = 1.0;
+    double atkMult = 1.0;
+    String prefixTitle = '';
+    Color prefixColor = const Color(0xFFFFA726);
+
+    if (!template.isBoss && !isExamFight) {
+      switch (forcePrefix) {
+        case EnemyPrefix.weak:
+          hpMult = 0.75;
+          atkMult = 0.8;
+          prefixTitle = 'Słaby ';
+          prefixColor = const Color(0xFFCFD8DC);
+          break;
+        case EnemyPrefix.normal:
+          hpMult = 1.0;
+          atkMult = 1.0;
+          prefixTitle = '';
+          prefixColor = const Color(0xFFFFA726);
+          break;
+        case EnemyPrefix.strong:
+          hpMult = 1.45;
+          atkMult = 1.3;
+          prefixTitle = 'Silny ⚠️ ';
+          prefixColor = const Color(0xFFFF5252);
+          break;
+      }
+    }
+
+    final int enemyMaxHp = ((template.baseHp + kmScale * (template.isBoss ? 3 : 1)) * hpMult).round();
+    final int enemyBaseAtk = ((template.baseAtk + (kmScale * 0.40).round()) * atkMult).round();
+
+    int enemyHp = enemyMaxHp;
+    String battleMsg = isExamFight
+        ? '🥋 EGZAMIN: Twój egzaminator ${template.name} wkracza na arenę!'
+        : template.isBoss
+            ? '⚠️ BOSS: Pojawia się ${template.name}!'
+            : 'Z cienia atakuje $prefixTitle${template.name}!';
+
+    int burnTurns = 0;
+    int burnDmg = 0;
+    int frozenTurns = 0;
+    bool hasTrinketDeathDefyUsed = false;
+
+    final avatarUrls = NinjaAssetUrls.enemyAvatars[template.name] ?? [];
+
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: const Color(0xFF141211),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(22))),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setBattleState) {
+            void enemyTurn() {
+              if (enemyHp <= 0) return;
+
+              if (frozenTurns > 0) {
+                frozenTurns--;
+                battleMsg += '\n❄️ ${template.name} jest unieruchomiony!';
+                setBattleState(() {});
+                return;
+              }
+
+              if (myobokuSetCount >= 2) {
+                setState(() {
+                  chakra = min(maxChakra, chakra + 4);
+                });
+              }
+
+              final rawDmg = enemyBaseAtk + _rng.nextInt(4);
+              final dmg = max(2, rawDmg - (totalDefense ~/ 2));
+
+              setState(() {
+                hp = max(0, hp - dmg);
+              });
+              battleMsg = '${template.name} zadaje $dmg dmg witalnych! (Twoja Obrona: $totalDefense)';
+              _saveGameData();
+
+              if (hp <= 0 && currentTrinket.name.contains('Naszyjnik Pierwszego') && !hasTrinketDeathDefyUsed) {
+                hasTrinketDeathDefyUsed = true;
+                setState(() {
+                  hp = 1;
+                });
+                battleMsg += '\n💎 Cud! Naszyjnik Pierwszego Hokage ocalił twoje życie (1 HP)!';
+                setBattleState(() {});
+                return;
+              }
+
+              if (hp <= 0) {
+                Navigator.pop(ctx);
+                if (isExamFight) {
+                  setState(() => hp = 1);
+                  addLog('❌ Egzamin oblany! Medyk wioskowy opatrzył twoje stłuczenia.');
+                } else {
+                  returnToVillage(fallenInBattle: true);
+                }
+              }
+            }
+
+            void executeJutsu(Jutsu jutsu) {
+              if (chakra < jutsu.chakraCost) {
+                battleMsg = 'Brak czakry na ${jutsu.name}!';
+                setBattleState(() {});
+                return;
+              }
+
+              setState(() {
+                chakra -= jutsu.chakraCost;
+              });
+
+              final dealt = (totalAttack * jutsu.powerMultiplier) + _rng.nextInt(4);
+              enemyHp = max(0, enemyHp - dealt);
+              battleMsg = 'Użyto ${jutsu.name}! Zadałeś $dealt obrażeń.';
+
+              switch (jutsu.effect) {
+                case JutsuEffect.burn:
+                  burnTurns = jutsu.effectDuration;
+                  burnDmg = jutsu.effectValue;
+                  battleMsg += '\n🔥 Cel podpalony!';
+                  break;
+                case JutsuEffect.freeze:
+                case JutsuEffect.stun:
+                  frozenTurns = jutsu.effectDuration;
+                  battleMsg += '\n❄️ Przeciwnik unieruchomiony!';
+                  break;
+                case JutsuEffect.shock:
+                  if (_rng.nextInt(100) < 50) {
+                    frozenTurns = 1;
+                    battleMsg += '\n⚡ Paraliż! Wróg traci turę!';
+                  }
+                  break;
+                case JutsuEffect.lifesteal:
+                  final healed = ((dealt * jutsu.effectValue) / 100).round();
+                  setState(() {
+                    hp = min(maxHp, hp + healed);
+                  });
+                  battleMsg += '\n💚 Wyssano $healed Zdrowia!';
+                  break;
+                default:
+                  break;
+              }
+
+              if (burnTurns > 0 && enemyHp > 0) {
+                enemyHp = max(0, enemyHp - burnDmg);
+                burnTurns--;
+                battleMsg += '\n🔥 Ogień zadał $burnDmg dmg!';
+              }
+
+              if (enemyHp <= 0) {
+                Navigator.pop(ctx);
+
+                if (isExamFight) {
+                  setState(() {
+                    passedRankIndex = examTargetRank!;
+                  });
+                  addExperience(150 + examTargetRank! * 50);
+                  _saveGameData();
+                  addLog('🏆 ZDANO EGZAMIN! Otrzymano awans na oficjalną rangę: $ninjaRank!');
+                  return;
+                }
+
+                double ryoMultiplier = currentTrinket.name.contains('Akatsuki') ? 1.3 : 1.0;
+                final rewardRyo = ((template.isBoss
+                        ? (80 + km * 2)
+                        : ((12 + km) * (forcePrefix == EnemyPrefix.strong ? 1.6 : (forcePrefix == EnemyPrefix.weak ? 0.8 : 1.0))).round()) *
+                    ryoMultiplier).round();
+
+                final expGained = template.isBoss
+                    ? (18 + (km ~/ 5) * 4)
+                    : ((4 + (km ~/ 5) * 1) * (forcePrefix == EnemyPrefix.strong ? 1.6 : (forcePrefix == EnemyPrefix.weak ? 0.8 : 1.0))).round();
+
+                setState(() {
+                  ryo += rewardRyo;
+                  if (activeMissionIndex != null) currentMissionKills++;
+                });
+                addExperience(expGained);
+                addLog('🏆 Pokonano: $prefixTitle${template.name}! Zdobyto $rewardRyo Ryo i +$expGained EXP.');
+
+                if (template.isBoss || forcePrefix == EnemyPrefix.strong || _rng.nextInt(100) < 25) {
+                  final mRoll = _rng.nextInt(100);
+                  String droppedMat = mRoll < 65 ? matIronOre : (mRoll < 92 ? matSteel : matCrystal);
+                  addCraftingMaterial(droppedMat, 1);
+                  addLog('🪨 Zdobyto materiał kuźniczy: [${craftingMaterials[droppedMat]!.name}]!');
+                }
+
+                _findLoot(guaranteedBossDrop: template.isBoss);
+              } else {
+                enemyTurn();
+                setBattleState(() {});
+              }
+            }
+
+            void useBattleItem(Consumable item) {
+              int totalAvailable = (bag[item.id] ?? 0) + (sealedBag[item.id] ?? 0);
+              if (totalAvailable <= 0) return;
+
+              if ((bag[item.id] ?? 0) > 0) {
+                bag[item.id] = bag[item.id]! - 1;
+                if (bag[item.id] == 0) bag.remove(item.id);
+              } else {
+                sealedBag[item.id] = sealedBag[item.id]! - 1;
+                if (sealedBag[item.id] == 0) sealedBag.remove(item.id);
+              }
+              _saveGameData();
+
+              if (item.type == ConsumableType.smokeEscape) {
+                Navigator.pop(ctx);
+                addLog('💨 Zasłona dymna! Bezpieczny odwrót.');
+                return;
+              } else if (item.type == ConsumableType.directDmg) {
+                enemyHp = max(0, enemyHp - item.value);
+                battleMsg = 'Pieczęć Wybuchowa zadała ${item.value} dmg!';
+                if (enemyHp <= 0) {
+                  Navigator.pop(ctx);
+                  final rewardRyo = template.isBoss ? 60 : 10;
+                  final expGained = template.isBoss ? 15 : 4;
+                  setState(() {
+                    ryo += rewardRyo;
+                    if (activeMissionIndex != null) currentMissionKills++;
+                  });
+                  addExperience(expGained);
+                  addLog('💥 Wysadzono ${template.name}! +$rewardRyo Ryo.');
+                  _findLoot(guaranteedBossDrop: template.isBoss);
+                  return;
+                }
+              } else if (item.type == ConsumableType.healHp) {
+                setState(() {
+                  hp = min(maxHp, hp + item.value);
+                });
+                battleMsg = 'Użyto [${item.name}]: +${item.value} HP!';
+              } else if (item.type == ConsumableType.healChakra) {
+                setState(() {
+                  chakra = min(maxChakra, chakra + item.value);
+                });
+                battleMsg = 'Użyto [${item.name}]: +${item.value} CP!';
+              } else if (item.type == ConsumableType.fullRestore) {
+                setState(() {
+                  maxHp += item.value;
+                  maxChakra += item.value;
+                  hp = maxHp;
+                  chakra = maxChakra;
+                });
+                battleMsg = 'Zjedzono [${item.name}]! Pełne HP/CP i +${item.value} max!';
+              } else if (item.type == ConsumableType.buffAtk) {
+                setState(() {
+                  bonusAtk += item.value;
+                });
+                battleMsg = 'Użyto [${item.name}]: +${item.value} stałego Ataku!';
+              }
+
+              enemyTurn();
+              setBattleState(() {});
+            }
+
+            void openCombatPouchDialog() {
+              final healableItems = allConsumables.where((c) {
+                final qty = (bag[c.id] ?? 0) + (sealedBag[c.id] ?? 0);
+                return qty > 0 && c.type != ConsumableType.smokeEscape && c.type != ConsumableType.directDmg;
+              }).toList();
+
+              showDialog(
+                context: context,
+                builder: (pouchCtx) => AlertDialog(
+                  backgroundColor: const Color(0xFF1C1A18),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFF66BB6A), width: 1.2)),
+                  title: const Text('🎒 Użyj zapasu w walce', style: TextStyle(color: Color(0xFFFFB74D), fontSize: 15, fontWeight: FontWeight.bold)),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    child: healableItems.isEmpty
+                      ? const Text('Brak mikstur ani prowiantu leczącego!', style: TextStyle(color: Colors.white54, fontSize: 12))
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: healableItems.length,
+                          separatorBuilder: (_, __) => const Divider(color: Colors.white12),
+                          itemBuilder: (_, i) {
+                            final itm = healableItems[i];
+                            final qty = (bag[itm.id] ?? 0) + (sealedBag[itm.id] ?? 0);
+                            final iconUrls = NinjaAssetUrls.consumableIcons[itm.id] ?? [];
+
+                            return ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: NinjaImage(
+                                primaryUrl: iconUrls.isNotEmpty ? iconUrls[0] : '',
+                                backupUrl: iconUrls.length > 1 ? iconUrls[1] : null,
+                                fallbackEmoji: itm.icon,
+                                size: 24,
+                              ),
+                              title: Text('${itm.name} (x$qty)', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                              subtitle: Text('${itm.statBonusText} • ${itm.description}', style: const TextStyle(fontSize: 10, color: Color(0xFF69F0AE))),
+                              trailing: ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00695C), padding: const EdgeInsets.symmetric(horizontal: 10)),
+                                onPressed: () {
+                                  Navigator.pop(pouchCtx);
+                                  useBattleItem(itm);
+                                },
+                                child: const Text('Użyj', style: TextStyle(fontSize: 10)),
+                              ),
+                            );
+                          },
+                        ),
+                  ),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(pouchCtx), child: const Text('Wróć', style: TextStyle(color: Colors.grey))),
+                  ],
+                ),
+              );
+            }
+
+            final int kibakuCount = (bag['c_kibaku'] ?? 0) + (sealedBag['c_kibaku'] ?? 0);
+            final int smokeCount = (bag['c_smoke'] ?? 0) + (sealedBag['c_smoke'] ?? 0);
+            final int healingPouchTotal = allConsumables.where((c) => c.type != ConsumableType.smokeEscape && c.type != ConsumableType.directDmg)
+                .map((c) => (bag[c.id] ?? 0) + (sealedBag[c.id] ?? 0))
+                .fold(0, (a, b) => a + b);
+
+            return Container(
+              padding: const EdgeInsets.all(16),
+              height: 490,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          if (avatarUrls.isNotEmpty) ...[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: NinjaImage(
+                                primaryUrl: avatarUrls[0],
+                                backupUrl: avatarUrls.length > 1 ? avatarUrls[1] : null,
+                                fallbackEmoji: template.isBoss ? '🥷' : '🐾',
+                                size: 36,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('$prefixTitle${template.name}', style: TextStyle(color: template.isBoss ? const Color(0xFFFF5252) : prefixColor, fontWeight: FontWeight.bold, fontSize: 14)),
+                              Text(template.title, style: const TextStyle(color: Colors.white54, fontSize: 10)),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Text('$enemyHp / $enemyMaxHp HP', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: enemyHp / enemyMaxHp,
+                      color: template.isBoss ? const Color(0xFFAB47BC) : const Color(0xFFEF5350),
+                      backgroundColor: Colors.white12,
+                      minHeight: 6,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Text('❤️ HP: ', style: TextStyle(fontSize: 10, color: Color(0xFFFF5252), fontWeight: FontWeight.bold)),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(3),
+                          child: LinearProgressIndicator(value: (hp / maxHp).clamp(0.0, 1.0), color: const Color(0xFFEF5350), backgroundColor: Colors.white12, minHeight: 5),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text('$hp/$maxHp', style: const TextStyle(fontSize: 9)),
+                      const SizedBox(width: 8),
+                      const Text('🌀 CP: ', style: TextStyle(fontSize: 10, color: Color(0xFF40C4FF), fontWeight: FontWeight.bold)),
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(3),
+                          child: LinearProgressIndicator(value: (chakra / maxChakra).clamp(0.0, 1.0), color: const Color(0xFF29B6F6), backgroundColor: Colors.white12, minHeight: 5),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text('$chakra/$maxChakra', style: const TextStyle(fontSize: 9)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(battleMsg, textAlign: TextAlign.center, style: const TextStyle(color: Color(0xFFFFD54F), fontFamily: 'monospace', fontSize: 11)),
+                  const Spacer(),
+                  Row(
+                    children: equippedJutsu.map((jutsu) {
+                      return Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: jutsu.color.withAlpha(100),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: jutsu.color.withAlpha(150))),
+                            ),
+                            onPressed: () => executeJutsu(jutsu),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(jutsu.name, textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                                Text('(${jutsu.chakraCost} CP)', style: const TextStyle(fontSize: 9, color: Colors.white70)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00695C),
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: openCombatPouchDialog,
+                          child: Text('🎒 ($healingPouchTotal)', maxLines: 1, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      if (kibakuCount > 0) ...[
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFBF360C),
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () => useBattleItem(allConsumables.firstWhere((c) => c.id == 'c_kibaku')),
+                            child: Text('🏷️ Wybuch ($kibakuCount)', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                      ],
+                      if (smokeCount > 0 && !template.isBoss && !isExamFight)
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF37474F),
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () => useBattleItem(allConsumables.firstWhere((c) => c.id == 'c_smoke')),
+                            child: Text('💨 Dym ($smokeCount)', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  TextButton(
+                    onPressed: () {
+                      if (template.isBoss || isExamFight) {
+                        battleMsg = 'Z tej walki nie można uciec bez dymu!';
+                        setBattleState(() {});
+                        return;
+                      }
+                      Navigator.pop(ctx);
+                      addLog('💨 Wycofano się ze starcia!');
+                    },
+                    child: Text(template.isBoss || isExamFight ? 'Brak odwrotu' : 'Ucieczka pieszo', style: TextStyle(color: template.isBoss || isExamFight ? const Color(0xFFEF5350) : Colors.grey)),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  NinjaGear _generateRandomGear({required GearSlot slot, bool guaranteedBossDrop = false}) {
+    ItemRarity rarity;
+
+    if (guaranteedBossDrop) {
+      final bossRoll = _rng.nextInt(100);
+      if (bossRoll < 75) {
+        rarity = ItemRarity.rare;
+      } else if (bossRoll < 97) {
+        rarity = ItemRarity.epic;
+      } else {
+        rarity = ItemRarity.legendary;
+      }
+    } else {
+      final roll = _rng.nextInt(1000);
+      if (roll < 880) {
+        rarity = ItemRarity.common;
+      } else if (roll < 985) {
+        rarity = ItemRarity.rare;
+      } else if (roll < 998) {
+        rarity = ItemRarity.epic;
+      } else {
+        rarity = ItemRarity.legendary;
+      }
+    }
+
+    if (rarity == ItemRarity.legendary) {
+      final legPool = legendaryArtifactsPool.where((g) => g.slot == slot).toList();
+      if (legPool.isNotEmpty) {
+        final template = legPool[_rng.nextInt(legPool.length)];
+        final statScaling = (km * 0.05).round();
+
+        return NinjaGear(
+          name: template.name,
+          rarity: ItemRarity.legendary,
+          baseStat: template.baseStat + statScaling,
+          bonusEffect: template.bonusEffect,
+          bonusValue: template.bonusValue,
+          setGroup: template.setGroup,
+          isSoulbound: false,
+        );
+      }
+    }
+
+    final availableArchetypes = standardArchetypesPool.where((g) => g.slot == slot).toList();
+    final baseArch = availableArchetypes[_rng.nextInt(availableArchetypes.length)];
+
+    int statMultiplier;
+    String prefix;
+    String bonusAffix = 'Brak';
+    int bonusVal = 0;
+
+    switch (rarity) {
+      case ItemRarity.common:
+        statMultiplier = 1;
+        prefix = 'Zwykły';
+        break;
+      case ItemRarity.rare:
+        statMultiplier = 2;
+        prefix = 'Mistrzowski';
+        bonusAffix = 'Precyzja Shinobi';
+        bonusVal = _rng.nextInt(2) + 2;
+        break;
+      case ItemRarity.epic:
+        statMultiplier = 3;
+        prefix = 'Pradawny';
+        bonusAffix = 'Pieczęć Pięciu Żywiołów';
+        bonusVal = _rng.nextInt(3) + 3;
+        break;
+      case ItemRarity.legendary:
+        statMultiplier = 1;
+        prefix = '';
+        break;
+    }
+
+    final statScaling = (km * 0.04).round();
+    final calculatedStat = (baseArch.baseStat * statMultiplier) + statScaling + _rng.nextInt(2);
+    final fullName = rarity == ItemRarity.common ? baseArch.baseName : '$prefix ${baseArch.baseName}';
+
+    return NinjaGear(
+      name: fullName,
+      rarity: rarity,
+      baseStat: calculatedStat,
+      bonusEffect: bonusAffix,
+      bonusValue: bonusVal,
+      setGroup: baseArch.setGroup,
+      isSoulbound: false,
+    );
+  }
+
+  void _findLoot({bool guaranteedBossDrop = false}) {
+    final roll = _rng.nextInt(100);
+    if (roll < 20 || guaranteedBossDrop) {
+      final slotIndex = _rng.nextInt(5);
+      final slot = GearSlot.values[slotIndex];
+      final drop = _generateRandomGear(slot: slot, guaranteedBossDrop: guaranteedBossDrop);
+
+      NinjaGear currentGear;
+      switch (slot) {
+        case GearSlot.weapon: currentGear = currentWeapon; break;
+        case GearSlot.armor: currentArmor = currentArmor; break;
+        case GearSlot.helmet: currentHelmet = currentHelmet; break;
+        case GearSlot.boots: currentBoots = currentBoots; break;
+        case GearSlot.trinket: currentTrinket = currentTrinket; break;
+      }
+
+      _showEquipDialog(newGear: drop, currentGear: currentGear, slot: slot);
+    } else if (roll < 48) {
+      final mRoll = _rng.nextInt(100);
+      String droppedMat = mRoll < 65 ? matIronOre : (mRoll < 92 ? matSteel : matCrystal);
+      addCraftingMaterial(droppedMat, 1);
+      addLog('🪨 Wyprawa: Wykopano [${craftingMaterials[droppedMat]!.name}]!');
+    } else {
+      final item = allConsumables[_rng.nextInt(allConsumables.length)];
+      addConsumableToBag(item.id, 1);
+      addLog('📦 Wyprawa: Znaleziono [${item.name}]!');
+    }
+  }
+
+  void _showEquipDialog({required NinjaGear newGear, required NinjaGear currentGear, required GearSlot slot}) {
+    String slotName;
+    String statType;
+    switch (slot) {
+      case GearSlot.weapon: slotName = 'Broń'; statType = 'Atak'; break;
+      case GearSlot.armor: slotName = 'Pancerz'; statType = 'Obrona'; break;
+      case GearSlot.helmet: slotName = 'Głowa'; statType = 'Obrona'; break;
+      case GearSlot.boots: slotName = 'Buty'; statType = 'Obrona'; break;
+      case GearSlot.trinket: slotName = 'Talizman'; statType = 'Moc'; break;
+    }
+
+    final int diff = newGear.effectiveStat - currentGear.effectiveStat;
+    final String diffSign = diff > 0 ? '+$diff' : '$diff';
+    final Color diffColor = diff > 0 ? const Color(0xFF69F0AE) : (diff < 0 ? const Color(0xFFFF5252) : Colors.grey);
+
+    void equipNew() {
+      setState(() {
+        switch (slot) {
+          case GearSlot.weapon: currentWeapon = newGear; break;
+          case GearSlot.armor: currentArmor = newGear; break;
+          case GearSlot.helmet: currentHelmet = newGear; break;
+          case GearSlot.boots: currentBoots = newGear; break;
+          case GearSlot.trinket: currentTrinket = newGear; break;
+        }
+      });
+      _saveGameData();
+      Navigator.pop(context);
+      addLog('✨ Założono: ${newGear.displayName} (Wymaga pieczęci!)');
+    }
+
+    void keepOld() {
+      Navigator.pop(context);
+      addLog('Odrzucono: ${newGear.displayName}.');
+    }
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF191716),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFFF8A65), width: 1.2)),
+        title: Text('Odnaleziono: $slotName!', style: const TextStyle(color: Color(0xFFFFB74D), fontSize: 18, fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: equipNew,
+                  borderRadius: BorderRadius.circular(10),
+                  splashColor: const Color(0xFFFFAB91).withAlpha(80),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF141211),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: newGear.color.withAlpha(200), width: 1.5),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('NOWY PRZEDMIOT', style: TextStyle(fontSize: 10, color: newGear.color, fontWeight: FontWeight.bold)),
+                            Text(newGear.rarityLabel, style: TextStyle(fontSize: 9, color: newGear.color)),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(newGear.displayName, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: newGear.color)),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Text('$statType: +${newGear.effectiveStat} ', style: const TextStyle(fontSize: 12, color: Colors.white)),
+                            Text('($diffSign)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: diffColor)),
+                          ],
+                        ),
+                        if (newGear.bonusEffect != 'Brak') ...[
+                          const SizedBox(height: 3),
+                          Text('✦ Właściwość: ${newGear.bonusEffect} (+${newGear.bonusValue})', style: const TextStyle(fontSize: 10, color: Color(0xFFFFD54F), fontWeight: FontWeight.w600)),
+                        ],
+                        if (newGear.setGroup != 'none') ...[
+                          const SizedBox(height: 2),
+                          Text('⚡ Zestaw: ${newGear.setGroup.toUpperCase()}', style: const TextStyle(fontSize: 9, color: Color(0xFF80DEEA))),
+                        ],
+                        const SizedBox(height: 6),
+                        const Text('⚠️ Przepada po powrocie', style: TextStyle(fontSize: 9, color: Color(0xFFFF5252))),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: keepOld,
+                  borderRadius: BorderRadius.circular(10),
+                  splashColor: Colors.grey.withAlpha(80),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF141211),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: currentGear.isSoulbound ? const Color(0xFFFFD54F) : currentGear.color.withAlpha(120),
+                        width: currentGear.isSoulbound ? 1.5 : 1.0,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('AKTUALNIE ZAŁOŻONY', style: TextStyle(fontSize: 10, color: Colors.white54, fontWeight: FontWeight.bold)),
+                            Text(currentGear.rarityLabel, style: TextStyle(fontSize: 9, color: currentGear.color)),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(currentGear.displayName, style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: currentGear.color)),
+                        const SizedBox(height: 4),
+                        Text('$statType: +${currentGear.effectiveStat}', style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                        if (currentGear.bonusEffect != 'Brak') ...[
+                          const SizedBox(height: 3),
+                          Text('✦ Właściwość: ${currentGear.bonusEffect} (+${currentGear.bonusValue})', style: const TextStyle(fontSize: 10, color: Color(0xFFFFD54F), fontWeight: FontWeight.w600)),
+                        ],
+                        if (currentGear.setGroup != 'none') ...[
+                          const SizedBox(height: 2),
+                          Text('⚡ Zestaw: ${currentGear.setGroup.toUpperCase()}', style: const TextStyle(fontSize: 9, color: Color(0xFF80DEEA))),
+                        ],
+                        const SizedBox(height: 6),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              currentGear.isSoulbound ? '📜 Zapieczętowany (Bezpieczny)' : '⚠️ Niezabezpieczony',
+                              style: TextStyle(fontSize: 9, color: currentGear.isSoulbound ? const Color(0xFF69F0AE) : const Color(0xFFFF5252)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showItemDetailsDialog(String slotName, NinjaGear gear) {
+    String statType = slotName == 'Broń' ? 'Atak' : (slotName == 'Talizman' ? 'Moc' : 'Obrona');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF191716),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: gear.color.withAlpha(120), width: 1.2)),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text('$slotName: ${gear.displayName}', style: TextStyle(color: gear.color, fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
+            if (gear.isSoulbound) const Text('📜', style: TextStyle(fontSize: 16)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Rzadkość: ${gear.rarityLabel}', style: TextStyle(color: gear.color, fontSize: 12, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            Text('$statType: +${gear.effectiveStat} (Bazowo: ${gear.baseStat} + ${gear.effectiveStat - gear.baseStat} z kucia)', style: const TextStyle(fontSize: 12, color: Colors.white70)),
+            if (gear.bonusEffect != 'Brak') ...[
+              const SizedBox(height: 4),
+              Text('✦ Właściwość: ${gear.bonusEffect} (+${gear.bonusValue})', style: const TextStyle(fontSize: 11, color: Color(0xFFFFD54F))),
+            ],
+            if (gear.setGroup != 'none') ...[
+              const SizedBox(height: 4),
+              Text('⚡ Przynależność do zestawu: ${gear.setGroup.toUpperCase()}', style: const TextStyle(fontSize: 11, color: Color(0xFF80DEEA))),
+            ],
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black45,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: gear.isSoulbound ? const Color(0xFF69F0AE) : const Color(0xFFFF5252), width: 0.8),
+              ),
+              child: Text(
+                gear.isSoulbound ? '📜 Przedmiot Zapieczętowany (Bezpieczny po powrocie)' : '⚠️ Przedmiot Niezabezpieczony (Przepadnie po powrocie!)',
+                style: TextStyle(fontSize: 10, color: gear.isSoulbound ? const Color(0xFF69F0AE) : const Color(0xFFFF5252)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Zamknij', style: TextStyle(color: Colors.grey))),
+        ],
+      ),
+    );
+  }
+
+  void _openVillageMissionsDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setMissionState) {
+          final nextExam = shinobiExams.firstWhere(
+            (e) => e.targetRankIndex == passedRankIndex + 1,
+            orElse: () => shinobiExams.last,
+          );
+          final bool hasPendingExam = passedRankIndex < 5 && level >= nextExam.requiredLevel;
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF1A1816),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFFFB74D), width: 1.2)),
+            title: const Text('📜 Biuro Misji i Egzaminów', style: TextStyle(color: Color(0xFFFFB74D), fontWeight: FontWeight.bold)),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (passedRankIndex < 5) ...[
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: hasPendingExam ? const Color(0xFF2E1C0A) : const Color(0xFF141211),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: hasPendingExam ? const Color(0xFFFFD54F) : Colors.white12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('🥋 Egzamin na ${nextExam.rankTitle}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: hasPendingExam ? const Color(0xFFFFD54F) : Colors.white70)),
+                                Text('Wymaga: Lvl ${nextExam.requiredLevel}', style: const TextStyle(fontSize: 9, color: Colors.grey)),
+                              ],
+                            ),
+                            const SizedBox(height: 2),
+                            Text('Egzaminator: ${nextExam.examinerName} (${nextExam.examinerTitle})', style: const TextStyle(fontSize: 10, color: Colors.white70)),
+                            Text(nextExam.lore, style: const TextStyle(fontStyle: FontStyle.italic, fontSize: 9, color: Colors.white54)),
+                            const SizedBox(height: 6),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: hasPendingExam ? const Color(0xFFE65100) : const Color(0xFF37474F),
+                                minimumSize: const Size(double.infinity, 30),
+                              ),
+                              onPressed: hasPendingExam
+                                  ? () {
+                                      Navigator.pop(ctx);
+                                      _startBattleWithEnemy(
+                                        EnemyTemplate(
+                                          name: nextExam.examinerName,
+                                          title: nextExam.examinerTitle,
+                                          baseHp: nextExam.hp,
+                                          baseAtk: nextExam.atk,
+                                          isBoss: true,
+                                        ),
+                                        isExamFight: true,
+                                        examTargetRank: nextExam.targetRankIndex,
+                                      );
+                                    }
+                                  : null,
+                              child: Text(hasPendingExam ? 'Rozpocznij Egzamin!' : 'Osiągnij Lvl ${nextExam.requiredLevel}', style: const TextStyle(fontSize: 10)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                    ],
+
+                    const Text('Dostępne Zlecenia Hokage:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFFFFAB91))),
+                    const SizedBox(height: 6),
+
+                    if (activeMissionIndex != null)
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: const Color(0xFF141211), borderRadius: BorderRadius.circular(6), border: Border.all(color: const Color(0xFF69F0AE).withAlpha(140))),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Aktywna Misja: Ranga ${allMissionsPool[activeMissionIndex!].rank}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFFFFD54F))),
+                            Text(allMissionsPool[activeMissionIndex!].title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 4),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(3),
+                              child: LinearProgressIndicator(
+                                value: currentMissionKills / allMissionsPool[activeMissionIndex!].requiredKills,
+                                color: const Color(0xFF69F0AE),
+                                backgroundColor: Colors.white12,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text('Postęp: $currentMissionKills / ${allMissionsPool[activeMissionIndex!].requiredKills}', style: const TextStyle(fontSize: 10)),
+                            const SizedBox(height: 6),
+                            if (currentMissionKills >= allMissionsPool[activeMissionIndex!].requiredKills)
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2E7D32), minimumSize: const Size(double.infinity, 28)),
+                                onPressed: () {
+                                  final m = allMissionsPool[activeMissionIndex!];
+                                  final bool isRepeat = completedMissionsHistory.contains(m.id);
+                                  final int earnedExp = isRepeat ? max(5, (m.rewardExp * 0.25).round()) : m.rewardExp;
+                                  final int earnedRyo = m.rewardRyo;
+
+                                  setState(() {
+                                    ryo += earnedRyo;
+                                    completedMissionsHistory.add(m.id);
+                                    activeMissionIndex = null;
+                                    currentMissionKills = 0;
+                                  });
+                                  addExperience(earnedExp);
+                                  _saveGameData();
+                                  Navigator.pop(ctx);
+                                  addLog('🎖️ Sukces misji: ${m.title}! +$earnedRyo Ryo, +$earnedExp EXP');
+                                },
+                                child: const Text('Odbierz Nagrodę! 🎁', style: TextStyle(fontSize: 10)),
+                              )
+                            else
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    activeMissionIndex = null;
+                                    currentMissionKills = 0;
+                                  });
+                                  _saveGameData();
+                                  Navigator.pop(ctx);
+                                  addLog('❌ Porzucono zlecenie.');
+                                },
+                                child: const Text('Porzuć misję', style: TextStyle(color: Color(0xFFFF5252), fontSize: 10)),
+                              ),
+                          ],
+                        ),
+                      )
+                    else
+                      ...allMissionsPool.map((m) {
+                        final bool isUnlocked = passedRankIndex >= m.minRankIndex;
+                        final bool isCompleted = completedMissionsHistory.contains(m.id);
+
+                        return Container(
+                          margin: const EdgeInsets.symmetric(vertical: 3),
+                          child: ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading: CircleAvatar(
+                              radius: 14,
+                              backgroundColor: isUnlocked ? const Color(0xFFE65100) : const Color(0xFF263238),
+                              child: Text(m.rank, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10, color: isUnlocked ? Colors.white : Colors.white38)),
+                            ),
+                            title: Row(
+                              children: [
+                                Expanded(child: Text(m.title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isUnlocked ? Colors.white : Colors.white38))),
+                                if (isCompleted) const Text('✓', style: TextStyle(fontSize: 10, color: Color(0xFF69F0AE))),
+                              ],
+                            ),
+                            subtitle: Text(
+                              isUnlocked
+                                  ? '${m.desc}\nNagroda: ${m.rewardRyo} Ryo | ${isCompleted ? "${(m.rewardExp * 0.25).round()} EXP" : "+${m.rewardExp} EXP"}'
+                                  : 'Wymaga zdania egzaminu rangi: ${m.rank}',
+                              style: TextStyle(fontSize: 9, color: isUnlocked ? Colors.white60 : const Color(0xFFFF5252).withAlpha(150)),
+                            ),
+                            trailing: isUnlocked
+                                ? ElevatedButton(
+                                    style: ElevatedButton.styleFrom(backgroundColor: isCompleted ? const Color(0xFF37474F) : const Color(0xFFE65100), padding: const EdgeInsets.symmetric(horizontal: 8)),
+                                    onPressed: () {
+                                      setState(() {
+                                        activeMissionIndex = allMissionsPool.indexOf(m);
+                                        currentMissionKills = 0;
+                                      });
+                                      _saveGameData();
+                                      Navigator.pop(ctx);
+                                      addLog('📜 Przyjęto zlecenie: ${m.title}!');
+                                    },
+                                    child: Text(isCompleted ? 'Powtórz' : 'Przyjmij', style: const TextStyle(fontSize: 9)),
+                                  )
+                                : const Icon(Icons.lock, size: 16, color: Colors.grey),
+                          ),
+                        );
+                      }),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Zamknij', style: TextStyle(color: Colors.grey))),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _openFieldMissionStatusDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF191716),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFFFAB91), width: 1.2)),
+        title: const Row(
+          children: [
+            Text('📜 ', style: TextStyle(fontSize: 20)),
+            Text('Cel Wyprawy', style: TextStyle(color: Color(0xFFFFB74D), fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: activeMissionIndex == null
+            ? const Text('Wyruszyłeś bez aktywnego zlecenia z Wioski!\nNowe misje można przyjmować wyłącznie w Biurze Hokage.', style: TextStyle(fontSize: 12, color: Colors.white70))
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Misja Rangi ${allMissionsPool[activeMissionIndex!].rank}:', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFFFFD54F))),
+                  const SizedBox(height: 2),
+                  Text(allMissionsPool[activeMissionIndex!].title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  const SizedBox(height: 4),
+                  Text(allMissionsPool[activeMissionIndex!].desc, style: const TextStyle(fontSize: 11, color: Colors.white70)),
+                  const SizedBox(height: 10),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: currentMissionKills / allMissionsPool[activeMissionIndex!].requiredKills,
+                      color: const Color(0xFF69F0AE),
+                      backgroundColor: Colors.white12,
+                      minHeight: 8,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text('Zneutralizowano celów: $currentMissionKills / ${allMissionsPool[activeMissionIndex!].requiredKills}', style: const TextStyle(fontSize: 11)),
+                  const SizedBox(height: 8),
+                  const Text('Nagrodę odbierzesz po bezpiecznym powrocie do wioski.', style: TextStyle(fontStyle: FontStyle.italic, fontSize: 10, color: Colors.white54)),
+                ],
+              ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Wróć do drogi', style: TextStyle(color: Colors.grey))),
+        ],
+      ),
+    );
+  }
+
+  void _openBagDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setBagState) {
+          final allConsumableIds = {...bag.keys, ...sealedBag.keys}.toList();
+
+          return AlertDialog(
+            backgroundColor: const Color(0xFF191716),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFFF8A65), width: 1.2)),
+            title: const Text('🎒 Plecak Rajdu', style: TextStyle(color: Color(0xFFFFB74D), fontSize: 16, fontWeight: FontWeight.bold)),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Przedmioty użytkowe i leczenie:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white70)),
+                    const SizedBox(height: 4),
+                    if (allConsumableIds.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text('Brak prowiantu!', style: TextStyle(fontSize: 11, color: Colors.white54)),
+                      )
+                    else
+                      ...allConsumableIds.map((id) {
+                        final item = allConsumables.firstWhere((c) => c.id == id);
+                        final int unsealedQty = bag[id] ?? 0;
+                        final int sealedQty = sealedBag[id] ?? 0;
+                        final bool isCombatOnly = item.type == ConsumableType.directDmg || item.type == ConsumableType.smokeEscape;
+                        final iconUrls = NinjaAssetUrls.consumableIcons[id] ?? [];
+
+                        return Container(
+                          margin: const EdgeInsets.symmetric(vertical: 4),
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(color: const Color(0xFF141211), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white12)),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              NinjaImage(
+                                primaryUrl: iconUrls.isNotEmpty ? iconUrls[0] : '',
+                                backupUrl: iconUrls.length > 1 ? iconUrls[1] : null,
+                                fallbackEmoji: item.icon,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                    const SizedBox(height: 2),
+                                    Wrap(
+                                      spacing: 4,
+                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                          decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(4)),
+                                          child: Text(item.statBonusText, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF69F0AE))),
+                                        ),
+                                        Text(item.description, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 9, color: Colors.white60)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      children: [
+                                        if (unsealedQty > 0) Text('$unsealedQty szt. ⚠️  ', style: const TextStyle(fontSize: 9, color: Color(0xFFFF5252))),
+                                        if (sealedQty > 0) Text('$sealedQty szt. 📜', style: const TextStyle(fontSize: 9, color: Color(0xFF69F0AE))),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isCombatOnly ? const Color(0xFF37474F) : const Color(0xFF00695C),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  minimumSize: const Size(54, 30),
+                                ),
+                                onPressed: isCombatOnly
+                                    ? null
+                                    : () {
+                                        useConsumable(item);
+                                        setBagState(() {});
+                                      },
+                                child: Text(isCombatOnly ? 'Walka' : 'Użyj', style: const TextStyle(fontSize: 10)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                    const Divider(color: Colors.white12),
+                    const Text('Materiały rzemieślnicze (bezpieczne):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Color(0xFFFFD54F))),
+                    const SizedBox(height: 4),
+                    ...craftingMaterials.values.map((mat) {
+                      final count = craftingBag[mat.id] ?? 0;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('${mat.icon} ${mat.name}', style: const TextStyle(fontSize: 10, color: Colors.white70)),
+                            Text('$count szt.', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFFFFD54F))),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Zamknij', style: TextStyle(color: Colors.grey))),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _openScrollsDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setScrollsState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFF141920),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFF42A5F5), width: 1.2)),
+            title: const Text('📜 Zwoje Technik (Max 3 aktywne)', style: TextStyle(color: Color(0xFF80D8FF), fontSize: 15, fontWeight: FontWeight.bold)),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: knownJutsu.length,
+                separatorBuilder: (_, __) => const Divider(color: Colors.white12),
+                itemBuilder: (context, index) {
+                  final jutsu = knownJutsu[index];
+                  final isEquipped = equippedJutsu.any((j) => j.id == jutsu.id);
+
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(jutsu.name, style: TextStyle(fontSize: 12, color: jutsu.color, fontWeight: FontWeight.bold)),
+                    subtitle: Text(
+                      'Koszt: ${jutsu.chakraCost} CP | Siła: x${jutsu.powerMultiplier}\n${jutsu.effectDescription}',
+                      style: const TextStyle(fontSize: 10, color: Colors.white60),
+                    ),
+                    trailing: ElevatedButton(
+                      style: ElevatedButton.styleFrom(backgroundColor: isEquipped ? const Color(0xFF2E7D32) : const Color(0xFF37474F)),
+                      onPressed: () {
+                        setState(() {
+                          if (isEquipped) {
+                            if (equippedJutsu.length > 1) {
+                              equippedJutsu.removeWhere((j) => j.id == jutsu.id);
+                            }
+                          } else {
+                            if (equippedJutsu.length >= 3) {
+                              equippedJutsu.removeLast();
+                            }
+                            equippedJutsu.add(jutsu);
+                          }
+                        });
+                        _saveGameData();
+                        setScrollsState(() {});
+                      },
+                      child: Text(isEquipped ? 'Założone' : 'Załóż', style: const TextStyle(fontSize: 10)),
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Zamknij', style: TextStyle(color: Colors.grey))),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -1422,321 +2782,339 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
 
     final totalItemsInBag = bag.values.fold(0, (a, b) => a + b) + sealedBag.values.fold(0, (a, b) => a + b);
 
-    final bgGradient = inVillage
-        ? const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0D241C), Color(0xFF141211)],
-          )
-        : const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF2E170A), Color(0xFF121110)],
-          );
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          inVillage ? 'Konohagakure (Baza)' : 'Eksploracja: $km km',
-          style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.8),
-        ),
-        centerTitle: true,
-        elevation: 6,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: inVillage
-                  ? [const Color(0xFF1B5E20), const Color(0xFF004D40)]
-                  : [const Color(0xFFBF360C), const Color(0xFFE65100)],
-            ),
+      body: Stack(
+        children: [
+          // TŁO EKRANU GŁÓWNEGO (GÓRA HOKAGE W WIOSCE / LAS W TERENIE)
+          Positioned.fill(
+            child: inVillage
+                ? ShaderMask(
+                    shaderCallback: (rect) {
+                      return const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.black54, Color(0xFF0F0E0D)],
+                      ).createShader(rect);
+                    },
+                    blendMode: BlendMode.darken,
+                    child: NinjaImage(
+                      primaryUrl: NinjaAssetUrls.bgHokagePrimary,
+                      backupUrl: NinjaAssetUrls.bgHokageBackup,
+                      fallbackEmoji: '',
+                      size: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Color(0xFF2E170A), Color(0xFF121110)],
+                      ),
+                    ),
+                  ),
           ),
-          child: inVillage
-              ? Opacity(
-                  opacity: 0.35,
-                  child: Image.network(
-                    'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80',
-                    fit: BoxFit.cover,
-                    errorBuilder: (ctx, err, stack) => const SizedBox.shrink(),
+
+          SafeArea(
+            child: Column(
+              children: [
+                // CUSTOM HEADER
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withAlpha(150),
+                    border: const Border(bottom: BorderSide(color: Colors.white12)),
                   ),
-                )
-              : null,
-        ),
-      ),
-      body: Container(
-        decoration: BoxDecoration(gradient: bgGradient),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.fromLTRB(10, 8, 10, 4),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF191716).withAlpha(220),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.white12),
-                boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 3))],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _badge('Ranga', 'Lvl $level ($ninjaRank)', rankColor),
-                      _badge('EXP', '$ninjaExp / $expForNextLevel', const Color(0xFF80D8FF)),
-                      _badge('Zdrowie (HP)', '$hp / $maxHp', hp < 30 ? const Color(0xFFFF5252) : const Color(0xFF69F0AE)),
-                      _badge('Czakra (CP)', '$chakra / $maxChakra', const Color(0xFF40C4FF)),
-                      _badge('Ryo', '$ryo', const Color(0xFFFFD54F)),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      _itemCard('Broń', currentWeapon, 'Atak: +$totalAttack'),
-                      const SizedBox(width: 6),
-                      _itemCard('Pancerz', currentArmor, 'Obr: +${currentArmor.effectiveStat}'),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      _itemCard('Głowa', currentHelmet, 'Obr: +${currentHelmet.effectiveStat}'),
-                      const SizedBox(width: 6),
-                      _itemCard('Buty', currentBoots, 'Obr: +${currentBoots.effectiveStat}'),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      _itemCard('Talizman', currentTrinket, 'Moc: +${currentTrinket.effectiveStat}'),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF141211),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.white12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Aktywne Zestawy:', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFFFFAB91))),
-                              Text(
-                                anbuSetCount >= 2 ? 'ANBU ($anbuSetCount/4): +$setBonusAttack Atak' : (sandSetCount >= 2 ? 'Piasek ($sandSetCount/2): +8 Obrona' : (myobokuSetCount >= 2 ? 'Myōboku (2/2): +4 CP/turę' : 'Brak aktywnych')),
-                                style: const TextStyle(fontSize: 8, color: Color(0xFF69F0AE)),
-                              ),
-                            ],
-                          ),
-                        ),
+                      Text(
+                        inVillage ? 'Konohagakure (Baza)' : 'Eksploracja: $km km',
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 0.8),
+                      ),
+                      Text(
+                        inVillage ? '⛰️ Góra Hokage' : '🌲 Las Kraju Ognia',
+                        style: const TextStyle(fontSize: 12, color: Colors.white60),
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
-
-            if (inVillage)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFE65100),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              elevation: 4,
-                            ),
-                            onPressed: leaveVillage,
-                            child: const Text('Wyrusz w Las 🌲', style: TextStyle(fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF5D4037),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: _openVillageMissionsDialog,
-                            child: const Text('📜 Biuro Misji'),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFE65100),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: _openBlacksmithDialog,
-                            child: const Text('🔨 Kowal'),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1B5E20),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                            onPressed: _openMedicDialog,
-                            child: const Text('🩺 Medyk'),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF00695C),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                            onPressed: _openBagDialog,
-                            child: Text('🎒 ($totalItemsInBag)'),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1565C0),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            ),
-                            onPressed: _openScrollsDialog,
-                            child: Text('📜 (${equippedJutsu.length}/3)'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ),
-              ),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-              child: Align(alignment: Alignment.centerLeft, child: Text('Dziennik (Ostatnie zdarzenie):', style: TextStyle(color: Colors.grey, fontSize: 10))),
-            ),
-
-            Container(
-              height: 48,
-              width: double.infinity,
-              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFF121110),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white12),
-                boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4)],
-              ),
-              child: Center(
-                child: SingleChildScrollView(
-                  child: Text(
-                    log.isNotEmpty ? log.first : 'Wyprawa trwa...',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      color: Color(0xFFFFCC80),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
+                // PANEL STATYSTYK I INTERAKTYWNEGO EKWIPUNKU
+                Container(
+                  margin: const EdgeInsets.fromLTRB(10, 8, 10, 4),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF191716).withAlpha(220),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white12),
+                    boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 6, offset: Offset(0, 3))],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _badge('Ranga', 'Lvl $level ($ninjaRank)', rankColor),
+                          _badge('EXP', '$ninjaExp / $expForNextLevel', const Color(0xFF80D8FF)),
+                          _badge('Zdrowie (HP)', '$hp / $maxHp', hp < 30 ? const Color(0xFFFF5252) : const Color(0xFF69F0AE)),
+                          _badge('Czakra (CP)', '$chakra / $maxChakra', const Color(0xFF40C4FF)),
+                          _badge('Ryo', '$ryo', const Color(0xFFFFD54F)),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          _itemCard('Broń', currentWeapon, 'Atak: +$totalAttack'),
+                          const SizedBox(width: 6),
+                          _itemCard('Pancerz', currentArmor, 'Obr: +${currentArmor.effectiveStat}'),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          _itemCard('Głowa', currentHelmet, 'Obr: +${currentHelmet.effectiveStat}'),
+                          const SizedBox(width: 6),
+                          _itemCard('Buty', currentBoots, 'Obr: +${currentBoots.effectiveStat}'),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          _itemCard('Talizman', currentTrinket, 'Moc: +${currentTrinket.effectiveStat}'),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF141211),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.white12),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('Aktywne Zestawy:', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFFFFAB91))),
+                                  Text(
+                                    anbuSetCount >= 2 ? 'ANBU ($anbuSetCount/4): +$setBonusAttack Atak' : (sandSetCount >= 2 ? 'Piasek ($sandSetCount/2): +8 Obrona' : (myobokuSetCount >= 2 ? 'Myōboku (2/2): +4 CP/turę' : 'Brak aktywnych')),
+                                    style: const TextStyle(fontSize: 8, color: Color(0xFF69F0AE)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ),
 
-            const Spacer(),
-
-            if (!inVillage)
-              Container(
-                padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
+                if (inVillage)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    child: Column(
                       children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF00695C),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: _openBagDialog,
-                            icon: const Text('🎒', style: TextStyle(fontSize: 13)),
-                            label: Text('($totalItemsInBag)', style: const TextStyle(fontSize: 11)),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF5D4037),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: _openFieldMissionStatusDialog,
-                            icon: const Text('📜', style: TextStyle(fontSize: 13)),
-                            label: Text(
-                              activeMissionIndex != null ? '$currentMissionKills/${allMissionsPool[activeMissionIndex!].requiredKills}' : 'Zadanie',
-                              style: const TextStyle(fontSize: 11),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1B5E20),
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                            ),
-                            onPressed: returnToVillage,
-                            icon: const Text('⛩️', style: TextStyle(fontSize: 13)),
-                            label: const Text('Ucieczka', style: TextStyle(fontSize: 11)),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 54,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE65100),
-                          elevation: 6,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: Color(0xFFFFAB91), width: 1.2),
-                          ),
-                        ),
-                        onPressed: proceedMission,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        Row(
                           children: [
-                            Text('Idź naprzód', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
-                            SizedBox(width: 8),
-                            Text('🌲', style: TextStyle(fontSize: 18)),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFE65100),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  elevation: 4,
+                                ),
+                                onPressed: leaveVillage,
+                                child: const Text('Wyrusz w Las 🌲', style: TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF5D4037),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                onPressed: _openVillageMissionsDialog,
+                                child: const Text('📜 Biuro Misji'),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFE65100),
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                onPressed: _openBlacksmithDialog,
+                                child: const Text('🔨 Kowal'),
+                              ),
+                            ),
                           ],
                         ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF1B5E20),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: _openMedicDialog,
+                                child: const Text('🩺 Medyk'),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF00695C),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: _openBagDialog,
+                                child: Text('🎒 ($totalItemsInBag)'),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF1565C0),
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: _openScrollsDialog,
+                                child: Text('📜 (${equippedJutsu.length}/3)'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                  child: Align(alignment: Alignment.centerLeft, child: Text('Dziennik (Ostatnie zdarzenie):', style: TextStyle(color: Colors.grey, fontSize: 10))),
+                ),
+
+                Container(
+                  height: 48,
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF121110).withAlpha(220),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.white12),
+                    boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 4)],
+                  ),
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        log.isNotEmpty ? log.first : 'Wyprawa trwa...',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          color: Color(0xFFFFCC80),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-          ],
-        ),
+
+                const Spacer(),
+
+                if (!inVillage)
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF00695C),
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                onPressed: _openBagDialog,
+                                icon: const Text('🎒', style: TextStyle(fontSize: 13)),
+                                label: Text('($totalItemsInBag)', style: const TextStyle(fontSize: 11)),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF5D4037),
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                onPressed: _openFieldMissionStatusDialog,
+                                icon: const Text('📜', style: TextStyle(fontSize: 13)),
+                                label: Text(
+                                  activeMissionIndex != null ? '$currentMissionKills/${allMissionsPool[activeMissionIndex!].requiredKills}' : 'Zadanie',
+                                  style: const TextStyle(fontSize: 11),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF1B5E20),
+                                  padding: const EdgeInsets.symmetric(vertical: 8),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                ),
+                                onPressed: returnToVillage,
+                                icon: const Text('⛩️', style: TextStyle(fontSize: 13)),
+                                label: const Text('Ucieczka', style: TextStyle(fontSize: 11)),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 54,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFE65100),
+                              elevation: 6,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(color: Color(0xFFFFAB91), width: 1.2),
+                              ),
+                            ),
+                            onPressed: proceedMission,
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Idź naprzód', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.8)),
+                                SizedBox(width: 8),
+                                Text('🌲', style: TextStyle(fontSize: 18)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
