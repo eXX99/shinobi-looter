@@ -15,17 +15,14 @@ const String matIronOre = 'mat_iron_ore';
 const String matSteel = 'mat_steel';
 const String matCrystal = 'mat_crystal';
 
-// BAZA LINKÓW GRAFIK (GŁÓWNY + ZAPASOWY CDN + FALLBACK EMOJI)
 class NinjaAssetUrls {
-  // Tło Góry Hokage
   static const String bgHokagePrimary = 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=1200&q=80';
   static const String bgHokageBackup = 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Mount_Rushmore_National_Memorial.jpg/1200px-Mount_Rushmore_National_Memorial.jpg';
 
-  // Ikony prowiantu / przedmiotów
   static const Map<String, List<String>> consumableIcons = {
     'c_pill': [
-      'https://raw.githubusercontent.com/feathericons/feather/master/icons/disc.svg',
-      'https://cdn-icons-png.flaticon.com/128/883/883360.png'
+      'https://cdn-icons-png.flaticon.com/128/883/883360.png',
+      'https://cdn-icons-png.flaticon.com/128/3004/3004458.png'
     ],
     'c_dango': [
       'https://cdn-icons-png.flaticon.com/128/3361/3361376.png',
@@ -53,7 +50,6 @@ class NinjaAssetUrls {
     ],
   };
 
-  // Portrety wrogów / bossów
   static const Map<String, List<String>> enemyAvatars = {
     'Zabuza Momochi': [
       'https://api.dicebear.com/7.x/bottts/png?seed=Zabuza',
@@ -78,12 +74,13 @@ class NinjaAssetUrls {
   };
 }
 
-// WIDŻET KASKADOWEGO ŁADOWANIA OBRAZÓW (PRIMARY -> BACKUP -> EMOJI FALLBACK)
-class NinjaImage extends StatefulWidget {
+class NinjaImage extends StatelessWidget {
   final String primaryUrl;
   final String? backupUrl;
   final String fallbackEmoji;
-  final double size;
+  final double? width;
+  final double? height;
+  final double emojiSize;
   final BoxFit fit;
 
   const NinjaImage({
@@ -91,43 +88,34 @@ class NinjaImage extends StatefulWidget {
     required this.primaryUrl,
     this.backupUrl,
     required this.fallbackEmoji,
-    this.size = 28,
+    this.width,
+    this.height,
+    this.emojiSize = 20,
     this.fit = BoxFit.contain,
   });
 
   @override
-  State<NinjaImage> createState() => _NinjaImageState();
-}
-
-class _NinjaImageState extends State<NinjaImage> {
-  int _attempt = 0; // 0: primary, 1: backup, 2: fallback
-
-  @override
   Widget build(BuildContext context) {
-    if (_attempt == 2 || widget.primaryUrl.isEmpty) {
-      return Text(widget.fallbackEmoji, style: TextStyle(fontSize: widget.size * 0.75));
-    }
-
-    final currentUrl = _attempt == 0 ? widget.primaryUrl : (widget.backupUrl ?? '');
-
-    if (currentUrl.isEmpty) {
-      return Text(widget.fallbackEmoji, style: TextStyle(fontSize: widget.size * 0.75));
+    if (primaryUrl.isEmpty) {
+      return Text(fallbackEmoji, style: TextStyle(fontSize: emojiSize));
     }
 
     return Image.network(
-      currentUrl,
-      width: widget.size,
-      height: widget.size,
-      fit: widget.fit,
-      errorBuilder: (context, error, stackTrace) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            setState(() {
-              _attempt++;
-            });
-          }
-        });
-        return Text(widget.fallbackEmoji, style: TextStyle(fontSize: widget.size * 0.75));
+      primaryUrl,
+      width: width,
+      height: height,
+      fit: fit,
+      errorBuilder: (ctx, err, stack) {
+        if (backupUrl != null && backupUrl!.isNotEmpty) {
+          return Image.network(
+            backupUrl!,
+            width: width,
+            height: height,
+            fit: fit,
+            errorBuilder: (ctx2, err2, stack2) => Text(fallbackEmoji, style: TextStyle(fontSize: emojiSize)),
+          );
+        }
+        return Text(fallbackEmoji, style: TextStyle(fontSize: emojiSize));
       },
     );
   }
@@ -1079,7 +1067,9 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                             primaryUrl: iconUrls.isNotEmpty ? iconUrls[0] : '',
                             backupUrl: iconUrls.length > 1 ? iconUrls[1] : null,
                             fallbackEmoji: item.icon,
-                            size: 24,
+                            width: 24,
+                            height: 24,
+                            emojiSize: 18,
                           ),
                           title: Text(item.name, style: const TextStyle(fontSize: 11)),
                           subtitle: Text('Pieczęć: $cost Ryo', style: const TextStyle(fontSize: 9, color: Color(0xFFFFD54F))),
@@ -1834,7 +1824,9 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                                 primaryUrl: iconUrls.isNotEmpty ? iconUrls[0] : '',
                                 backupUrl: iconUrls.length > 1 ? iconUrls[1] : null,
                                 fallbackEmoji: itm.icon,
-                                size: 24,
+                                width: 24,
+                                height: 24,
+                                emojiSize: 18,
                               ),
                               title: Text('${itm.name} (x$qty)', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                               subtitle: Text('${itm.statBonusText} • ${itm.description}', style: const TextStyle(fontSize: 10, color: Color(0xFF69F0AE))),
@@ -1881,7 +1873,9 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                                 primaryUrl: avatarUrls[0],
                                 backupUrl: avatarUrls.length > 1 ? avatarUrls[1] : null,
                                 fallbackEmoji: template.isBoss ? '🥷' : '🐾',
-                                size: 36,
+                                width: 36,
+                                height: 36,
+                                emojiSize: 22,
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -2636,7 +2630,9 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                                 primaryUrl: iconUrls.isNotEmpty ? iconUrls[0] : '',
                                 backupUrl: iconUrls.length > 1 ? iconUrls[1] : null,
                                 fallbackEmoji: item.icon,
-                                size: 24,
+                                width: 24,
+                                height: 24,
+                                emojiSize: 18,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
@@ -2785,7 +2781,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // TŁO EKRANU GŁÓWNEGO (GÓRA HOKAGE W WIOSCE / LAS W TERENIE)
           Positioned.fill(
             child: inVillage
                 ? ShaderMask(
@@ -2797,11 +2792,10 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                       ).createShader(rect);
                     },
                     blendMode: BlendMode.darken,
-                    child: NinjaImage(
+                    child: const NinjaImage(
                       primaryUrl: NinjaAssetUrls.bgHokagePrimary,
                       backupUrl: NinjaAssetUrls.bgHokageBackup,
                       fallbackEmoji: '',
-                      size: double.infinity,
                       fit: BoxFit.cover,
                     ),
                   )
@@ -2819,7 +2813,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
           SafeArea(
             child: Column(
               children: [
-                // CUSTOM HEADER
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
@@ -2841,7 +2834,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   ),
                 ),
 
-                // PANEL STATYSTYK I INTERAKTYWNEGO EKWIPUNKU
                 Container(
                   margin: const EdgeInsets.fromLTRB(10, 8, 10, 4),
                   padding: const EdgeInsets.all(10),
