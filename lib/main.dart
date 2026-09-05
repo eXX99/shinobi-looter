@@ -92,7 +92,7 @@ const List<BaseGearArchetype> standardArchetypesPool = [
   BaseGearArchetype(slot: GearSlot.boots, baseName: 'Ciężarki Treningowe na Kostki', baseStat: 7, lore: 'Hartują nogi pod kątem natychmiastowego zrywu.'),
   BaseGearArchetype(slot: GearSlot.boots, baseName: 'Drewniane Geta Żabiego Mędrca', baseStat: 9, setGroup: 'myoboku', lore: 'Idealny balans na śliskich skałach.'),
 
-  // TALIZMANY (SLOT 5)
+  // TALIZMANY
   BaseGearArchetype(slot: GearSlot.trinket, baseName: 'Amulet Ochronny z Liścia', baseStat: 3, lore: 'Błogosławieństwo kaplicy Konohy.'),
   BaseGearArchetype(slot: GearSlot.trinket, baseName: 'Dzwonki Przetrwania Jonina', baseStat: 5, lore: 'Dwa dzwonki używane przy testach polowych.'),
   BaseGearArchetype(slot: GearSlot.trinket, baseName: 'Koraliki Modlitewne Mnicha', baseStat: 6, lore: 'Koją umysł i ułatwiają skupienie CP.'),
@@ -134,7 +134,7 @@ const List<LegendaryGearTemplate> legendaryArtifactsPool = [
   LegendaryGearTemplate(name: 'Lewitujące Płyty Rikudō', slot: GearSlot.boots, baseStat: 33, bonusEffect: 'Lot Ponad Ziemią', bonusValue: 8, lore: 'Unoszą shinobi bez dotykania podłoża.'),
   LegendaryGearTemplate(name: 'Naszyjnik Pierwszego Hokage', slot: GearSlot.trinket, baseStat: 25, bonusEffect: 'Ocalenie Duszy Hashiramy', bonusValue: 10, lore: 'Kryształ czakry chroniący przed natychmiastowym zgonem.'),
   LegendaryGearTemplate(name: 'Pierścień Akatsuki (Zero)', slot: GearSlot.trinket, baseStat: 28, bonusEffect: 'Rezonans Bólu Świata', bonusValue: 9, lore: 'Zwielokrotnia łup i Ryo z pokonanych wrogów.'),
-  LegendaryGearTemplate(name: 'Złota Moneta Tsunade', slot: GearSlot.trinket, baseStat: 22, bonusEffect: 'Hazardowe Szczęście', bonusValue: 8, lore: 'Zwiększa szanse na legendarne znaleziska.'),
+  LegendaryGearTemplate(name: 'Złota Moneta Tsunade', slot: GearSlot.trinket, baseStat: 22, bonusEffect: 'Hazardowe Szczęście', bonusValue: 8, lore: 'Zwiększa szanse na rzadkie minerały i łup.'),
 ];
 
 class NinjaGear {
@@ -236,6 +236,7 @@ class Consumable {
   final String id;
   final String name;
   final String description;
+  final String statBonusText;
   final ConsumableType type;
   final int value;
   final int price;
@@ -245,6 +246,7 @@ class Consumable {
     required this.id,
     required this.name,
     required this.description,
+    required this.statBonusText,
     required this.type,
     required this.value,
     required this.price,
@@ -253,14 +255,14 @@ class Consumable {
 }
 
 const List<Consumable> allConsumables = [
-  Consumable(id: 'c_pill', name: 'Pigułka Żywnościowa', description: '+35 Czakry (CP).', type: ConsumableType.healChakra, value: 35, price: 25, icon: '💊'),
-  Consumable(id: 'c_dango', name: 'Słodkie Dango', description: '+20 Zdrowia (HP).', type: ConsumableType.healHp, value: 20, price: 18, icon: '🍡'),
-  Consumable(id: 'c_bandage', name: 'Bandaże Uciskowe', description: '+30 Zdrowia (HP).', type: ConsumableType.healHp, value: 30, price: 28, icon: '🩹'),
-  Consumable(id: 'c_ointment', name: 'Balsam Ziołowy Medyka', description: '+55 Zdrowia (HP).', type: ConsumableType.healHp, value: 55, price: 45, icon: '🧴'),
-  Consumable(id: 'c_ramen', name: 'Ramen Ichiraku', description: 'Pełne leczenie HP i CP oraz +10 Max statystyk.', type: ConsumableType.fullRestore, value: 10, price: 130, icon: '🍜'),
-  Consumable(id: 'c_power_pill', name: 'Pigułka Siły', description: '+3 do stałego Ataku.', type: ConsumableType.buffAtk, value: 3, price: 110, icon: '⚡'),
-  Consumable(id: 'c_kibaku', name: 'Pieczęć Wybuchowa', description: 'Zadaje 30 dmg w walce.', type: ConsumableType.directDmg, value: 30, price: 45, icon: '🏷️'),
-  Consumable(id: 'c_smoke', name: 'Bomba Dymna', description: 'Gwarantowana ucieczka ze starcia.', type: ConsumableType.smokeEscape, value: 0, price: 35, icon: '💨'),
+  Consumable(id: 'c_pill', name: 'Pigułka Żywnościowa', description: 'Błyskawicznie nasyca obieg czakry.', statBonusText: '🌀 +35 CP', type: ConsumableType.healChakra, value: 35, price: 25, icon: '💊'),
+  Consumable(id: 'c_dango', name: 'Słodkie Dango', description: 'Przekąska przywracająca drobne siły.', statBonusText: '❤️ +20 HP', type: ConsumableType.healHp, value: 20, price: 18, icon: '🍡'),
+  Consumable(id: 'c_bandage', name: 'Bandaże Uciskowe', description: 'Zatamowują rany cięte i stłuczenia.', statBonusText: '❤️ +30 HP', type: ConsumableType.healHp, value: 30, price: 28, icon: '🩹'),
+  Consumable(id: 'c_ointment', name: 'Balsam Ziołowy Medyka', description: 'Głęboko regenerująca maść medyczna.', statBonusText: '❤️ +55 HP', type: ConsumableType.healHp, value: 55, price: 45, icon: '🧴'),
+  Consumable(id: 'c_ramen', name: 'Ramen Ichiraku', description: 'Legendarne danie odnawiające wszystkie siły.', statBonusText: '❤️/🌀 Max +10 & Full', type: ConsumableType.fullRestore, value: 10, price: 130, icon: '🍜'),
+  Consumable(id: 'c_power_pill', name: 'Pigułka Siły', description: 'Wzmacnia mięśnie i siłę uderzeń fizycznych.', statBonusText: '⚔️ +3 Ataku', type: ConsumableType.buffAtk, value: 3, price: 110, icon: '⚡'),
+  Consumable(id: 'c_kibaku', name: 'Pieczęć Wybuchowa', description: 'Zadaje bezpośrednie obrażenia bojowe.', statBonusText: '💥 30 DMG', type: ConsumableType.directDmg, value: 30, price: 45, icon: '🏷️'),
+  Consumable(id: 'c_smoke', name: 'Bomba Dymna', description: 'Tworzy gęstą zasłonę do odwrotu.', statBonusText: '💨 Ucieczka 100%', type: ConsumableType.smokeEscape, value: 0, price: 35, icon: '💨'),
 ];
 
 class Jutsu {
@@ -343,7 +345,6 @@ class EnemyTemplate {
 }
 
 const List<EnemyTemplate> standardEnemiesPool = [
-  // Zwierzęta leśne
   EnemyTemplate(name: 'Dziki Ninja-Pies', title: 'Zdziczały Ninken', baseHp: 20, baseAtk: 6, isBeast: true),
   EnemyTemplate(name: 'Leśny Odyniec Kraju Ognia', title: 'Szarżująca Bestia', baseHp: 28, baseAtk: 7, isBeast: true),
   EnemyTemplate(name: 'Gigantyczny Pająk z Mgły', title: 'Drapieżnik Pajęczyn', baseHp: 24, baseAtk: 8, isBeast: true),
@@ -351,17 +352,11 @@ const List<EnemyTemplate> standardEnemiesPool = [
   EnemyTemplate(name: 'Święty Jeleń Klanu Nara', title: 'Zwinny Strażnik Boru', baseHp: 26, baseAtk: 7, isBeast: true),
   EnemyTemplate(name: 'Trująca Żmija z Doliny Ryūchi', title: 'Jadowity Wąż', baseHp: 25, baseAtk: 9, isBeast: true),
   EnemyTemplate(name: 'Pustynny Skorpion z Piasku', title: 'Pancerne Żądło', baseHp: 30, baseAtk: 8, isBeast: true),
-
-  // Otogakure / Eksperymenty Przeklętej Pieczęci
   EnemyTemplate(name: 'Poddany Przeklętej Pieczęci', title: 'Niestabilny Wojownik Dźwięku', baseHp: 34, baseAtk: 10),
   EnemyTemplate(name: 'Zmutowany Berserker Dźwięku', title: 'Krwiożerczy Eksperyment', baseHp: 44, baseAtk: 11),
   EnemyTemplate(name: 'Chimera Czakry z Otogakure', title: 'Bestia Laboratoryjna', baseHp: 40, baseAtk: 10, isBeast: true),
-
-  // Żywiołaki & Konstrukty Ninjutsu
   EnemyTemplate(name: 'Błotny Golem Doton', title: 'Kamienny Konstrukt', baseHp: 46, baseAtk: 8),
   EnemyTemplate(name: 'Wodny Klon Zabójcy (Mizu Bunshin)', title: 'Płynny Szpieg Kiri', baseHp: 24, baseAtk: 9),
-
-  // Standardowi Wrogi Shinobi
   EnemyTemplate(name: 'Bandyta z Kraju Fal', title: 'Pospolity Rabuś', baseHp: 24, baseAtk: 6),
   EnemyTemplate(name: 'Zbuntowany Ninja Deszczu', title: 'Nuke-nin z Amegakure', baseHp: 28, baseAtk: 7),
   EnemyTemplate(name: 'Szpieg z Iwagakure', title: 'Zwiadowca Skały', baseHp: 32, baseAtk: 8),
@@ -489,19 +484,15 @@ const List<ShinobiMission> allMissionsPool = [
   ShinobiMission(id: 'm_d1', rank: 'D', minRankIndex: 0, title: 'Odchwaszczanie Ogrodów Daimyō', desc: 'Wyeliminuj 4 szkodniki w lasach Liścia.', requiredKills: 4, rewardRyo: 45, rewardExp: 22),
   ShinobiMission(id: 'm_d2', rank: 'D', minRankIndex: 0, title: 'Poszukiwanie Kota Tora', desc: 'Przepędź 5 leśnych bestii i zabezpiecz teren.', requiredKills: 5, rewardRyo: 65, rewardExp: 28),
   ShinobiMission(id: 'm_d3', rank: 'D', minRankIndex: 1, title: 'Patrol Graniczny Wioski', desc: 'Odpędź 7 włóczęgów sprzed bram Liścia.', requiredKills: 7, rewardRyo: 85, rewardExp: 38),
-
   ShinobiMission(id: 'm_c1', rank: 'C', minRankIndex: 2, title: 'Eskorta Mostowniczego Tazuny', desc: 'Wyeliminuj 8 bandytów z Kraju Fal.', requiredKills: 8, rewardRyo: 170, rewardExp: 75),
   ShinobiMission(id: 'm_c2', rank: 'C', minRankIndex: 2, title: 'Ochrona Karawany z Suny', desc: 'Zlikwiduj 9 pustynnych koczowników na szlaku.', requiredKills: 9, rewardRyo: 210, rewardExp: 90),
   ShinobiMission(id: 'm_c3', rank: 'C', minRankIndex: 2, title: 'Odzyskanie Skradzionego Zwoju', desc: 'Dopadnij 10 zbiegłych rzezimieszków.', requiredKills: 10, rewardRyo: 250, rewardExp: 110),
-
   ShinobiMission(id: 'm_b1', rank: 'B', minRankIndex: 3, title: 'Polowanie na Szpiegów ze Skały', desc: 'Zneutralizuj 12 zwiadowców wrogiej nacji.', requiredKills: 12, rewardRyo: 380, rewardExp: 160),
   ShinobiMission(id: 'm_b2', rank: 'B', minRankIndex: 3, title: 'Infiltracja Bazy Otogakure', desc: 'Wyeliminuj 13 eksperymentów Węża.', requiredKills: 13, rewardRyo: 440, rewardExp: 190),
   ShinobiMission(id: 'm_b3', rank: 'B', minRankIndex: 3, title: 'Zasadzka na Czwórkę Dźwięku', desc: 'Pokonaj 14 strażników bramy dźwięku.', requiredKills: 14, rewardRyo: 500, rewardExp: 220),
-
   ShinobiMission(id: 'm_a1', rank: 'A', minRankIndex: 4, title: 'Pojmanie Członków Akatsuki', desc: 'Pokonaj 16 elitarnych wojowników w chmurach.', requiredKills: 16, rewardRyo: 720, rewardExp: 310),
   ShinobiMission(id: 'm_a2', rank: 'A', minRankIndex: 4, title: 'Obrona Konohy przed Inwazją', desc: 'Wyeliminuj 18 uderzeniowych shinobi.', requiredKills: 18, rewardRyo: 850, rewardExp: 370),
   ShinobiMission(id: 'm_a3', rank: 'A', minRankIndex: 4, title: 'Tajne Zlecenie Korzenia ANBU', desc: 'Dokonaj egzekucji 20 zdrajców Wioski.', requiredKills: 20, rewardRyo: 1000, rewardExp: 430),
-
   ShinobiMission(id: 'm_s1', rank: 'S', minRankIndex: 5, title: 'Ocalenie Świata przed Shinra Tensei', desc: 'Zgładź 22 bóstwa ścieżek bólu.', requiredKills: 22, rewardRyo: 1500, rewardExp: 650),
   ShinobiMission(id: 'm_s2', rank: 'S', minRankIndex: 5, title: 'Powstrzymanie Madary Uchiha', desc: 'Pokonaj 25 wskrzeszonych legend Edo Tensei.', requiredKills: 25, rewardRyo: 2000, rewardExp: 850),
   ShinobiMission(id: 'm_s3', rank: 'S', minRankIndex: 5, title: 'Pojedynek z Boginią Kaguya', desc: 'Pokonaj 28 międzywymiarowych abominacji.', requiredKills: 28, rewardRyo: 2800, rewardExp: 1200),
@@ -1702,7 +1693,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
 
                 if (template.isBoss || forcePrefix == EnemyPrefix.strong || _rng.nextInt(100) < 25) {
                   final mRoll = _rng.nextInt(100);
-                  String droppedMat = mRoll < 60 ? matIronOre : (mRoll < 90 ? matSteel : matCrystal);
+                  String droppedMat = mRoll < 65 ? matIronOre : (mRoll < 92 ? matSteel : matCrystal);
                   addCraftingMaterial(droppedMat, 1);
                   addLog('🪨 Zdobyto materiał kuźniczy: [${craftingMaterials[droppedMat]!.name}]!');
                 }
@@ -1747,13 +1738,88 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   _findLoot(guaranteedBossDrop: template.isBoss);
                   return;
                 }
+              } else if (item.type == ConsumableType.healHp) {
+                setState(() {
+                  hp = min(maxHp, hp + item.value);
+                });
+                battleMsg = 'Użyto [${item.name}]: +${item.value} HP!';
+              } else if (item.type == ConsumableType.healChakra) {
+                setState(() {
+                  chakra = min(maxChakra, chakra + item.value);
+                });
+                battleMsg = 'Użyto [${item.name}]: +${item.value} CP!';
+              } else if (item.type == ConsumableType.fullRestore) {
+                setState(() {
+                  maxHp += item.value;
+                  maxChakra += item.value;
+                  hp = maxHp;
+                  chakra = maxChakra;
+                });
+                battleMsg = 'Zjedzono [${item.name}]! Pełne HP/CP i +${item.value} max!';
+              } else if (item.type == ConsumableType.buffAtk) {
+                setState(() {
+                  bonusAtk += item.value;
+                });
+                battleMsg = 'Użyto [${item.name}]: +${item.value} stałego Ataku!';
               }
+
               enemyTurn();
               setBattleState(() {});
             }
 
+            // MENU PRZEDMIOTÓW LECZĄCYCH W WALCE
+            void openCombatPouchDialog() {
+              final healableItems = allConsumables.where((c) {
+                final qty = (bag[c.id] ?? 0) + (sealedBag[c.id] ?? 0);
+                return qty > 0 && c.type != ConsumableType.smokeEscape && c.type != ConsumableType.directDmg;
+              }).toList();
+
+              showDialog(
+                context: context,
+                builder: (pouchCtx) => AlertDialog(
+                  backgroundColor: const Color(0xFF1E1C1A),
+                  title: const Text('🎒 Użyj zapasu w walce', style: TextStyle(color: Colors.orangeAccent, fontSize: 15)),
+                  content: SizedBox(
+                    width: double.maxFinite,
+                    child: healableItems.isEmpty
+                      ? const Text('Brak mikstur ani prowiantu leczącego!', style: TextStyle(color: Colors.white54, fontSize: 12))
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: healableItems.length,
+                          separatorBuilder: (_, __) => const Divider(color: Colors.white12),
+                          itemBuilder: (_, i) {
+                            final itm = healableItems[i];
+                            final qty = (bag[itm.id] ?? 0) + (sealedBag[itm.id] ?? 0);
+                            return ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: Text(itm.icon, style: const TextStyle(fontSize: 20)),
+                              title: Text('${itm.name} (x$qty)', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                              subtitle: Text('${itm.statBonusText} • ${itm.description}', style: const TextStyle(fontSize: 10, color: Colors.greenAccent)),
+                              trailing: ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.teal.shade800, padding: const EdgeInsets.symmetric(horizontal: 10)),
+                                onPressed: () {
+                                  Navigator.pop(pouchCtx);
+                                  useBattleItem(itm);
+                                },
+                                child: const Text('Użyj', style: TextStyle(fontSize: 10)),
+                              ),
+                            );
+                          },
+                        ),
+                  ),
+                  actions: [
+                    TextButton(onPressed: () => Navigator.pop(pouchCtx), child: const Text('Wróć', style: TextStyle(color: Colors.grey))),
+                  ],
+                ),
+              );
+            }
+
             final int kibakuCount = (bag['c_kibaku'] ?? 0) + (sealedBag['c_kibaku'] ?? 0);
             final int smokeCount = (bag['c_smoke'] ?? 0) + (sealedBag['c_smoke'] ?? 0);
+            final int healingPouchTotal = allConsumables.where((c) => c.type != ConsumableType.smokeEscape && c.type != ConsumableType.directDmg)
+                .map((c) => (bag[c.id] ?? 0) + (sealedBag[c.id] ?? 0))
+                .fold(0, (a, b) => a + b);
 
             return Container(
               padding: const EdgeInsets.all(16),
@@ -1782,6 +1848,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                     minHeight: 6,
                   ),
                   const SizedBox(height: 8),
+                  // Paski gracza w walce
                   Row(
                     children: [
                       const Text('❤️ HP: ', style: TextStyle(fontSize: 10, color: Colors.redAccent)),
@@ -1822,19 +1889,27 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      if (kibakuCount > 0)
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E4B35)),
+                        icon: const Text('🎒', style: TextStyle(fontSize: 12)),
+                        label: Text('Zapasy ($healingPouchTotal)', style: const TextStyle(fontSize: 11)),
+                        onPressed: openCombatPouchDialog,
+                      ),
+                      const SizedBox(width: 6),
+                      if (kibakuCount > 0) ...[
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange.shade800),
-                          icon: const Text('🏷️'),
-                          label: Text('Wybuch ($kibakuCount)'),
+                          icon: const Text('🏷️', style: TextStyle(fontSize: 12)),
+                          label: Text('Wybuch ($kibakuCount)', style: const TextStyle(fontSize: 11)),
                           onPressed: () => useBattleItem(allConsumables.firstWhere((c) => c.id == 'c_kibaku')),
                         ),
-                      const SizedBox(width: 8),
+                        const SizedBox(width: 6),
+                      ],
                       if (smokeCount > 0 && !template.isBoss && !isExamFight)
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey.shade700),
-                          icon: const Text('💨'),
-                          label: Text('Dym ($smokeCount)'),
+                          icon: const Text('💨', style: TextStyle(fontSize: 12)),
+                          label: Text('Dym ($smokeCount)', style: const TextStyle(fontSize: 11)),
                           onPressed: () => useBattleItem(allConsumables.firstWhere((c) => c.id == 'c_smoke')),
                         ),
                     ],
@@ -1989,7 +2064,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     }
   }
 
-  // INTERAKTYWNY POPUP PORÓWNANIA ZE WŁAŚCIWOŚCIAMI I WYBOREM PRZEZ KLIKNIĘCIE W PRZEDMIOT
   void _showEquipDialog({required NinjaGear newGear, required NinjaGear currentGear, required GearSlot slot}) {
     String slotName;
     String statType;
@@ -2197,6 +2271,59 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showItemDetailsDialog(String slotName, NinjaGear gear) {
+    String statType = slotName == 'Broń' ? 'Atak' : (slotName == 'Talizman' ? 'Moc' : 'Obrona');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1C1A),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text('$slotName: ${gear.displayName}', style: TextStyle(color: gear.color, fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
+            if (gear.isSoulbound) const Text('📜', style: TextStyle(fontSize: 16)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Rzadkość: ${gear.rarityLabel}', style: TextStyle(color: gear.color, fontSize: 12, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            Text('$statType: +${gear.effectiveStat} (Bazowo: ${gear.baseStat} + ${gear.effectiveStat - gear.baseStat} z kucia)', style: const TextStyle(fontSize: 12, color: Colors.white70)),
+            if (gear.bonusEffect != 'Brak') ...[
+              const SizedBox(height: 4),
+              Text('✦ Właściwość: ${gear.bonusEffect} (+${gear.bonusValue})', style: const TextStyle(fontSize: 11, color: Colors.amberAccent)),
+            ],
+            if (gear.setGroup != 'none') ...[
+              const SizedBox(height: 4),
+              Text('⚡ Przynależność do zestawu: ${gear.setGroup.toUpperCase()}', style: const TextStyle(fontSize: 11, color: Colors.cyanAccent)),
+            ],
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black38,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: gear.isSoulbound ? Colors.greenAccent : Colors.redAccent, width: 0.8),
+              ),
+              child: Text(
+                gear.isSoulbound ? '📜 Przedmiot Zapieczętowany (Bezpieczny po powrocie)' : '⚠️ Przedmiot Niezabezpieczony (Przepadnie po powrocie!)',
+                style: TextStyle(fontSize: 10, color: gear.isSoulbound ? Colors.greenAccent : Colors.redAccent),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Zamknij', style: TextStyle(color: Colors.grey))),
+        ],
       ),
     );
   }
@@ -2432,6 +2559,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     );
   }
 
+  // PRZEJRZYSTY PLECAK RAJDU Z DOKŁADNYMI WARTOŚCIAMI STATYSTYK
   void _openBagDialog() {
     showDialog(
       context: context,
@@ -2449,7 +2577,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Przedmioty użytkowe:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white70)),
+                    const Text('Przedmioty użytkowe i leczenie:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: Colors.white70)),
                     const SizedBox(height: 4),
                     if (allConsumableIds.isEmpty)
                       const Padding(
@@ -2475,11 +2603,19 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                    Row(
+                                      children: [
+                                        Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                        const SizedBox(width: 6),
+                                        Text(item.statBonusText, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.greenAccent)),
+                                      ],
+                                    ),
+                                    Text(item.description, style: const TextStyle(fontSize: 9, color: Colors.white60)),
+                                    const SizedBox(height: 2),
                                     Row(
                                       children: [
                                         if (unsealedQty > 0) Text('$unsealedQty szt. ⚠️  ', style: const TextStyle(fontSize: 9, color: Colors.redAccent)),
-                                        if (sealedQty > 0) Text('$sealedQty szt. 📜', style: const TextStyle(fontSize: 9, color: Colors.greenAccent)),
+                                        if (sealedQty > 0) Text('$sealedQty szt. 📜 (Bezpieczne)', style: const TextStyle(fontSize: 9, color: Colors.greenAccent)),
                                       ],
                                     ),
                                   ],
@@ -2602,6 +2738,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       ),
       body: Column(
         children: [
+          // PANEL STATYSTYK I INTERAKTYWNEGO EKWIPUNKU
           Container(
             padding: const EdgeInsets.all(10),
             color: const Color(0xFF1C1A18),
@@ -2726,24 +2863,39 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
 
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-            child: Align(alignment: Alignment.centerLeft, child: Text('Dziennik:', style: TextStyle(color: Colors.grey, fontSize: 11))),
+            child: Align(alignment: Alignment.centerLeft, child: Text('Dziennik (Ostatnie zdarzenie):', style: TextStyle(color: Colors.grey, fontSize: 10))),
           ),
 
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: const Color(0xFF0C0B0A), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white10)),
-              child: ListView.builder(
-                itemCount: log.length,
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                  child: Text(log[index], style: TextStyle(fontFamily: 'monospace', color: index == 0 ? const Color(0xFFFFD59E) : Colors.white60, fontSize: 11)),
+          // ZMNIEJSZONE OKNO DZIENNIKA NA OSTATNIE ZDARZENIE
+          Container(
+            height: 48,
+            width: double.infinity,
+            margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0C0B0A),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white12),
+            ),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Text(
+                  log.isNotEmpty ? log.first : 'Wyprawa trwa...',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontFamily: 'monospace',
+                    color: Color(0xFFFFD59E),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
           ),
 
+          const Spacer(),
+
+          // ERGONOMICZNA STREFA DOLNA
           if (!inVillage)
             Container(
               padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
@@ -2838,41 +2990,51 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
 
   Widget _itemCard(String slot, NinjaGear item, String statText) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: Colors.black26,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showItemDetailsDialog(slot, item),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: item.isSoulbound ? Colors.amberAccent : item.color.withAlpha(120), width: item.isSoulbound ? 1.5 : 1.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Container(
+            padding: const EdgeInsets.all(5),
+            decoration: BoxDecoration(
+              color: Colors.black26,
+              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: item.isSoulbound ? Colors.amberAccent : item.color.withAlpha(120),
+                width: item.isSoulbound ? 1.5 : 1.0,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Text(
-                    '$slot: ${item.displayName}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: item.color),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '$slot: ${item.displayName}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: item.color),
+                      ),
+                    ),
+                    if (item.isSoulbound) const Text(' 📜', style: TextStyle(fontSize: 10)),
+                  ],
                 ),
-                if (item.isSoulbound) const Text(' 📜', style: TextStyle(fontSize: 10)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(statText, style: const TextStyle(fontSize: 9, color: Colors.white70)),
+                    Text(
+                      item.isSoulbound ? 'Zapieczętowany' : '⚠️ Przepada',
+                      style: TextStyle(fontSize: 8, color: item.isSoulbound ? Colors.greenAccent : Colors.redAccent),
+                    ),
+                  ],
+                ),
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(statText, style: const TextStyle(fontSize: 9, color: Colors.white70)),
-                Text(
-                  item.isSoulbound ? 'Zapieczętowany' : '⚠️ Przepada',
-                  style: TextStyle(fontSize: 8, color: item.isSoulbound ? Colors.greenAccent : Colors.redAccent),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
       ),
     );
