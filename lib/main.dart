@@ -956,7 +956,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                         return ListTile(
                           dense: true,
                           contentPadding: EdgeInsets.zero,
-                          leading: Text(item.icon, style: const TextStyle(fontSize: 20)),
+                          leading: Text(item.icon, style: const TextStyle(fontSize: 18)),
                           title: Text(item.name, style: const TextStyle(fontSize: 11)),
                           subtitle: Text('Pieczęć: $cost Ryo', style: const TextStyle(fontSize: 9, color: Color(0xFFFFD54F))),
                           trailing: ElevatedButton(
