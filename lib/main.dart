@@ -85,7 +85,7 @@ const List<BaseGearArchetype> standardArchetypesPool = [
 
   BaseGearArchetype(slot: GearSlot.boots, baseName: 'Standardowe Sandały Shinobi', baseStat: 2, lore: 'Dobre oparcie stóp na drzewach.'),
   BaseGearArchetype(slot: GearSlot.boots, baseName: 'Wyciszone Mokasyny ANBU', baseStat: 5, setGroup: 'anbu', lore: 'Tłumią odgłos kroków przy skradaniu.'),
-  BaseGearArchetype(slot: GearTiny: GearSlot.boots, baseName: 'Ciężarki Treningowe na Kostki', baseStat: 7, lore: 'Hartują nogi pod kątem natychmiastowego zrywu.'),
+  BaseGearArchetype(slot: GearSlot.boots, baseName: 'Ciężarki Treningowe na Kostki', baseStat: 7, lore: 'Hartują nogi pod kątem natychmiastowego zrywu.'),
   BaseGearArchetype(slot: GearSlot.boots, baseName: 'Drewniane Geta Żabiego Mędrca', baseStat: 9, setGroup: 'myoboku', lore: 'Idealny balans na śliskich skałach.'),
 
   BaseGearArchetype(slot: GearSlot.trinket, baseName: 'Amulet Ochronny z Liścia', baseStat: 3, lore: 'Błogosławieństwo kaplicy Konohy.'),
@@ -1164,8 +1164,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
               width: double.maxFinite,
               child: SingleChildScrollView(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: CrossAxisAlignment.start,
                   children: [
                     const Text('„Leczenie ran i regeneracja sieci czakry to podstawa przeżycia.”', style: TextStyle(fontStyle: FontStyle.italic, fontSize: 11, color: Colors.white70)),
                     const SizedBox(height: 10),
