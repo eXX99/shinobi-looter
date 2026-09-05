@@ -254,8 +254,8 @@ const List<Consumable> allConsumables = [
   Consumable(id: 'c_dango', name: 'Słodkie Dango', description: 'Przekąska przywracająca siły.', statBonusText: '❤️ +20 HP', type: ConsumableType.healHp, value: 20, price: 18, icon: '🍡'),
   Consumable(id: 'c_bandage', name: 'Bandaże Uciskowe', description: 'Zatamowują rany cięte.', statBonusText: '❤️ +30 HP', type: ConsumableType.healHp, value: 30, price: 28, icon: '🩹'),
   Consumable(id: 'c_ointment', name: 'Balsam Medyka', description: 'Głęboko regenerująca maść lecznicza.', statBonusText: '❤️ +55 HP', type: ConsumableType.healHp, value: 55, price: 45, icon: '🧴'),
-  Consumable(id: 'c_ramen', name: 'Ramen Ichiraku', description: 'Legendarne danie odnawiające wszystkie siły.', statBonusText: '❤️/🌀 Max +10 & Full', type: ConsumableType.fullRestore, value: 10, price: 130, icon: '🍜'),
-  Consumable(id: 'c_power_pill', name: 'Pigułka Siły', description: 'Wzmacnia mięśnie i siłę ciosów.', statBonusText: '⚔️ +3 Ataku', type: ConsumableType.buffAtk, value: 3, price: 110, icon: '⚡'),
+  Consumable(id: 'c_ramen', name: 'Ramen Ichiraku', description: 'Legendarne danie odnawiające siły.', statBonusText: '❤️/🌀 Max +10 & Full', type: ConsumableType.fullRestore, value: 10, price: 130, icon: '🍜'),
+  Consumable(id: 'c_power_pill', name: 'Pigułka Siły', description: 'Wzmacnia siłę ciosów.', statBonusText: '⚔️ +3 Ataku', type: ConsumableType.buffAtk, value: 3, price: 110, icon: '⚡'),
   Consumable(id: 'c_kibaku', name: 'Pieczęć Wybuchowa', description: 'Zadaje bezpośrednie obrażenia bojowe.', statBonusText: '💥 30 DMG', type: ConsumableType.directDmg, value: 30, price: 45, icon: '🏷️'),
   Consumable(id: 'c_smoke', name: 'Bomba Dymna', description: 'Tworzy gęstą zasłonę do odwrotu.', statBonusText: '💨 Ucieczka 100%', type: ConsumableType.smokeEscape, value: 0, price: 35, icon: '💨'),
 ];
@@ -1811,31 +1811,46 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                     }).toList(),
                   ),
                   const SizedBox(height: 8),
+                  // RESPONSYWNY PASEK DOLNY (BEZ UCINANIA PRZYCISKÓW)
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00695C), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                        icon: const Text('🎒', style: TextStyle(fontSize: 12)),
-                        label: Text('Zapasy ($healingPouchTotal)', style: const TextStyle(fontSize: 11)),
-                        onPressed: openCombatPouchDialog,
-                      ),
-                      const SizedBox(width: 6),
-                      if (kibakuCount > 0) ...[
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFBF360C), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                          icon: const Text('🏷️', style: TextStyle(fontSize: 12)),
-                          label: Text('Wybuch ($kibakuCount)', style: const TextStyle(fontSize: 11)),
-                          onPressed: () => useBattleItem(allConsumables.firstWhere((c) => c.id == 'c_kibaku')),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF00695C),
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: openCombatPouchDialog,
+                          child: Text('🎒 ($healingPouchTotal)', maxLines: 1, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                         ),
-                        const SizedBox(width: 6),
+                      ),
+                      const SizedBox(width: 5),
+                      if (kibakuCount > 0) ...[
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFBF360C),
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () => useBattleItem(allConsumables.firstWhere((c) => c.id == 'c_kibaku')),
+                            child: Text('🏷️ Wybuch ($kibakuCount)', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        const SizedBox(width: 5),
                       ],
                       if (smokeCount > 0 && !template.isBoss && !isExamFight)
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF37474F), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-                          icon: const Text('💨', style: TextStyle(fontSize: 12)),
-                          label: Text('Dym ($smokeCount)', style: const TextStyle(fontSize: 11)),
-                          onPressed: () => useBattleItem(allConsumables.firstWhere((c) => c.id == 'c_smoke')),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF37474F),
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            ),
+                            onPressed: () => useBattleItem(allConsumables.firstWhere((c) => c.id == 'c_smoke')),
+                            child: Text('💨 Dym ($smokeCount)', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
                         ),
                     ],
                   ),
@@ -1960,10 +1975,10 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       NinjaGear currentGear;
       switch (slot) {
         case GearSlot.weapon: currentGear = currentWeapon; break;
-        case GearSlot.armor: currentGear = currentArmor; break;
-        case GearSlot.helmet: currentGear = currentHelmet; break;
-        case GearSlot.boots: currentGear = currentBoots; break;
-        case GearSlot.trinket: currentGear = currentTrinket; break;
+        case GearSlot.armor: currentArmor = currentArmor; break;
+        case GearSlot.helmet: currentHelmet = currentHelmet; break;
+        case GearSlot.boots: currentBoots = currentBoots; break;
+        case GearSlot.trinket: currentTrinket = currentTrinket; break;
       }
 
       _showEquipDialog(newGear: drop, currentGear: currentGear, slot: slot);
@@ -1979,6 +1994,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     }
   }
 
+  // CZYSTE KARTY BEZ ETYKIET 'DOTKNIJ BY...'
   void _showEquipDialog({required NinjaGear newGear, required NinjaGear currentGear, required GearSlot slot}) {
     String slotName;
     String statType;
@@ -2020,18 +2036,12 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF191716),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: const BorderSide(color: Color(0xFFFF8A65), width: 1.2)),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Odnaleziono: $slotName!', style: const TextStyle(color: Color(0xFFFFB74D), fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 2),
-            const Text('Dotknij przedmiotu, który chcesz zachować:', style: TextStyle(color: Colors.white60, fontSize: 10)),
-          ],
-        ),
+        title: Text('Odnaleziono: $slotName!', style: const TextStyle(color: Color(0xFFFFB74D), fontSize: 18, fontWeight: FontWeight.bold)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // KARTA: NOWY PRZEDMIOT
               Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -2040,7 +2050,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   splashColor: const Color(0xFFFFAB91).withAlpha(80),
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: const Color(0xFF141211),
                       borderRadius: BorderRadius.circular(10),
@@ -2074,17 +2084,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                           Text('⚡ Zestaw: ${newGear.setGroup.toUpperCase()}', style: const TextStyle(fontSize: 9, color: Color(0xFF80DEEA))),
                         ],
                         const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('⚠️ Przepada po powrocie', style: TextStyle(fontSize: 9, color: Color(0xFFFF5252))),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(color: const Color(0xFFE65100), borderRadius: BorderRadius.circular(4)),
-                              child: const Text('Dotknij by ZAŁOŻYĆ', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white)),
-                            ),
-                          ],
-                        ),
+                        const Text('⚠️ Przepada po powrocie', style: TextStyle(fontSize: 9, color: Color(0xFFFF5252))),
                       ],
                     ),
                   ),
@@ -2093,6 +2093,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
 
               const SizedBox(height: 12),
 
+              // KARTA: STARY PRZEDMIOT
               Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -2101,7 +2102,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                   splashColor: Colors.grey.withAlpha(80),
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: const Color(0xFF141211),
                       borderRadius: BorderRadius.circular(10),
@@ -2133,19 +2134,9 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                           Text('⚡ Zestaw: ${currentGear.setGroup.toUpperCase()}', style: const TextStyle(fontSize: 9, color: Color(0xFF80DEEA))),
                         ],
                         const SizedBox(height: 6),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              currentGear.isSoulbound ? '📜 Zapieczętowany (Bezpieczny)' : '⚠️ Niezabezpieczony',
-                              style: TextStyle(fontSize: 9, color: currentGear.isSoulbound ? const Color(0xFF69F0AE) : const Color(0xFFFF5252)),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(color: Colors.white12, borderRadius: BorderRadius.circular(4)),
-                              child: const Text('Dotknij by ZACHOWAĆ', style: TextStyle(fontSize: 9, color: Colors.white70)),
-                            ),
-                          ],
+                        Text(
+                          currentGear.isSoulbound ? '📜 Zapieczętowany (Bezpieczny)' : '⚠️ Niezabezpieczony',
+                          style: TextStyle(fontSize: 9, color: currentGear.isSoulbound ? const Color(0xFF69F0AE) : const Color(0xFFFF5252)),
                         ),
                       ],
                     ),
@@ -2451,6 +2442,7 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
     );
   }
 
+  // PRZEJRZYSTY PLECAK Z ELASTYCZNYM ROZMIESZCZENIEM ELEMENTÓW
   void _openBagDialog() {
     showDialog(
       context: context,
@@ -2484,37 +2476,49 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
                         final bool isCombatOnly = item.type == ConsumableType.directDmg || item.type == ConsumableType.smokeEscape;
 
                         return Container(
-                          margin: const EdgeInsets.symmetric(vertical: 3),
+                          margin: const EdgeInsets.symmetric(vertical: 4),
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(color: const Color(0xFF141211), borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.white12)),
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(item.icon, style: const TextStyle(fontSize: 20)),
+                              Text(item.icon, style: const TextStyle(fontSize: 22)),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
+                                    Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                    const SizedBox(height: 2),
+                                    Wrap(
+                                      spacing: 4,
+                                      crossAxisAlignment: WrapCrossAlignment.center,
                                       children: [
-                                        Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                                        const SizedBox(width: 6),
-                                        Text(item.statBonusText, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF69F0AE))),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                          decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(4)),
+                                          child: Text(item.statBonusText, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF69F0AE))),
+                                        ),
+                                        Text(item.description, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 9, color: Colors.white60)),
                                       ],
                                     ),
-                                    Text(item.description, style: const TextStyle(fontSize: 9, color: Colors.white60)),
                                     const SizedBox(height: 2),
                                     Row(
                                       children: [
                                         if (unsealedQty > 0) Text('$unsealedQty szt. ⚠️  ', style: const TextStyle(fontSize: 9, color: Color(0xFFFF5252))),
-                                        if (sealedQty > 0) Text('$sealedQty szt. 📜 (Bezpieczne)', style: const TextStyle(fontSize: 9, color: Color(0xFF69F0AE))),
+                                        if (sealedQty > 0) Text('$sealedQty szt. 📜', style: const TextStyle(fontSize: 9, color: Color(0xFF69F0AE))),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
+                              const SizedBox(width: 6),
                               ElevatedButton(
-                                style: ElevatedButton.styleFrom(backgroundColor: isCombatOnly ? const Color(0xFF37474F) : const Color(0xFF00695C), padding: const EdgeInsets.symmetric(horizontal: 8)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isCombatOnly ? const Color(0xFF37474F) : const Color(0xFF00695C),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  minimumSize: const Size(54, 30),
+                                ),
                                 onPressed: isCombatOnly
                                     ? null
                                     : () {
@@ -2657,7 +2661,6 @@ class _ShinobiScreenState extends State<ShinobiScreen> {
         decoration: BoxDecoration(gradient: bgGradient),
         child: Column(
           children: [
-            // PANEL STATYSTYK I INTERAKTYWNEGO EKWIPUNKU
             Container(
               margin: const EdgeInsets.fromLTRB(10, 8, 10, 4),
               padding: const EdgeInsets.all(10),
